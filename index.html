@@ -2117,7 +2117,7 @@ function submitMaintenance() {
 // ===== SEND TO GOOGLE SHEETS =====
 async function sendToGoogleSheets(record) {
   const url = APP.config.webhookUrl;
-  if (!url) return; // No webhook configured
+  if (!url) { showToast('⚠️ Configure la URL del Web App en ⚙️ Config'); return; }
 
   // Build flat row with all fields
   const eq = record.equipment;
@@ -2125,8 +2125,8 @@ async function sendToGoogleSheets(record) {
 
   const payload = {
     FECHA: new Date(record.timestamp).toLocaleString('es-PE'),
-    TÉCNICO: record.technician,
-    CÓDIGO_INVENTARIO: record.code,
+    'TÉCNICO': record.technician,
+    'CÓDIGO_INVENTARIO': record.code,
   };
 
   // Add all equipment fields
@@ -2150,22 +2150,39 @@ async function sendToGoogleSheets(record) {
   }).filter(Boolean).join(' | ');
 
   try {
-    await fetch(url, {
+    // Use form-encoded POST which Google Apps Script handles better
+    const formData = new URLSearchParams();
+    formData.append('data', JSON.stringify(payload));
+    
+    const resp = await fetch(url, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload)
+      body: formData
     });
-    showToast('☁️ Registro enviado a Google Sheets');
+    
+    const result = await resp.json();
+    if (result.status === 'ok') {
+      showToast('☁️ Registro enviado a Google Sheets ✅');
+    } else {
+      showToast('⚠️ Error al guardar: ' + (result.message || ''));
+    }
   } catch(err) {
-    console.error('Error sending to Sheets:', err);
-    showToast('⚠️ No se pudo enviar a Google Sheets (se guardó localmente)');
-    // Queue for later retry
+    // Fallback: try no-cors mode (won't get response but data may arrive)
     try {
-      const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
-      queue.push(payload);
-      localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
-    } catch(e) {}
+      await fetch(url, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: new URLSearchParams({ data: JSON.stringify(payload) })
+      });
+      showToast('☁️ Registro enviado (sin confirmación)');
+    } catch(err2) {
+      console.error('Error sending to Sheets:', err2);
+      showToast('⚠️ No se pudo enviar a Google Sheets');
+      try {
+        const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
+        queue.push(payload);
+        localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
+      } catch(e) {}
+    }
   }
 }
 
