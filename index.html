@@ -2285,8 +2285,8 @@ async function sendToGoogleSheets(record) {
 // ===== PHOTO HANDLING =====
 const APP_PHOTOS = { 1: null, 2: null, 3: null };
 const PHOTO_LABELS = { 1: '📷 EQUIPO', 2: '🏷️ CÓDIGO INV.', 3: '🔄 CAMBIO' };
-const MAX_PHOTO_SIZE = 1200; // max dimension in px
-const PHOTO_QUALITY = 0.8; // JPEG quality
+const MAX_PHOTO_SIZE = 1600; // max dimension in px
+const PHOTO_QUALITY = 0.9; // JPEG quality
 
 function takePhoto(slot) {
   document.getElementById('photoInput' + slot).click();
