@@ -2355,6 +2355,7 @@ function resetPhotos() {
 
 // ===== SEARCH BY FICHA =====
 function searchByFicha(ficha) {
+  // CONFORMIDAD ONLY - does NOT touch equipment fields
   const resultDiv = document.getElementById('fichaResult');
   
   if (!ficha || ficha.length < 3 || !APP.csvData) {
@@ -2382,9 +2383,8 @@ function searchByFicha(ficha) {
   if (exact) {
     const name = findFieldValue(exact, 'USUARIO ASIGNADO') || '';
     const cargo = findFieldValue(exact, 'CARGO') || '';
-    const code = findFieldValue(exact, 'CÓDIGO INVENTARIO') || '';
     
-    // Autocomplete fields
+    // ONLY update conformity fields (by ID, not by data-key)
     document.getElementById('userName').value = name;
     document.getElementById('userCargo').value = cargo;
     document.getElementById('nameAutoTag').style.display = 'inline';
