@@ -2395,14 +2395,6 @@ function searchByFicha(ficha) {
     resultDiv.style.background = '#ECFDF5';
     resultDiv.style.border = '1px solid #A7F3D0';
     resultDiv.innerHTML = '<span style="color:#065F46;">✅ <strong>' + name + '</strong> — ' + cargo + '</span>';
-    
-    // Check if user changed vs current equipment
-    if (APP.currentEquipment) {
-      const currentFicha = findFieldValue(APP.currentEquipment, 'FICHA USUARIO') || '';
-      if (ficha !== currentFicha && ficha.trim() !== '') {
-        updateEquipmentUser(exact);
-      }
-    }
   } else if (matches.length <= 5) {
     // Show partial matches
     resultDiv.style.display = 'block';
