@@ -1407,9 +1407,9 @@ const FIELD_GROUPS = [
     name: '🏢 ORGANIZACIÓN',
     color: '#7C2D12',
     fields: [
-      { key: 'GERENCIA', label: 'Gerencia', editable: false },
-      { key: 'EQUIPO FUNCIONAL', label: 'Equipo Funcional', editable: false },
-      { key: 'GRUPO FUNCIONAL', label: 'Grupo Funcional', editable: false },
+      { key: 'GERENCIA', label: 'Gerencia', editable: true },
+      { key: 'EQUIPO FUNCIONAL', label: 'Equipo Funcional', editable: true },
+      { key: 'GRUPO FUNCIONAL', label: 'Grupo Funcional', editable: true },
     ]
   },
   {
@@ -2433,14 +2433,24 @@ function autocompleteFichaEquipo(ficha) {
     const name = findFieldValue(match, 'USUARIO ASIGNADO') || '';
     const cargo = findFieldValue(match, 'CARGO') || '';
     const tipo = findFieldValue(match, 'TIPO ASIGNACIÓN') || '';
+    const gerencia = findFieldValue(match, 'GERENCIA') || '';
+    const equipoFunc = findFieldValue(match, 'EQUIPO FUNCIONAL') || '';
+    const grupoFunc = findFieldValue(match, 'GRUPO FUNCIONAL') || '';
     
     resultDiv.style.display = 'block';
     resultDiv.style.background = '#ECFDF5';
     resultDiv.style.border = '1px solid #A7F3D0';
     resultDiv.innerHTML = '✅ <strong>' + name + '</strong> — ' + cargo;
     
-    // Update the other user fields
-    const fieldsMap = { 'USUARIO ASIGNADO': name, 'CARGO': cargo, 'TIPO ASIGNACIÓN': tipo };
+    // Update user fields + organization fields
+    const fieldsMap = { 
+      'USUARIO ASIGNADO': name, 
+      'CARGO': cargo, 
+      'TIPO ASIGNACIÓN': tipo,
+      'GERENCIA': gerencia,
+      'EQUIPO FUNCIONAL': equipoFunc,
+      'GRUPO FUNCIONAL': grupoFunc
+    };
     Object.entries(fieldsMap).forEach(([key, val]) => {
       const input = document.querySelector('.field-input[data-key="' + key + '"]');
       if (input && input.value !== val) {
@@ -2451,22 +2461,11 @@ function autocompleteFichaEquipo(ficha) {
       }
     });
     
-    // Also update conformity fields
-    document.getElementById('userName').value = name;
-    document.getElementById('userFicha').value = ficha;
-    document.getElementById('userCargo').value = cargo;
-    document.getElementById('nameAutoTag').style.display = 'inline';
-    document.getElementById('cargoAutoTag').style.display = 'inline';
-    document.getElementById('fichaResult').style.display = 'block';
-    document.getElementById('fichaResult').style.background = '#ECFDF5';
-    document.getElementById('fichaResult').style.border = '1px solid #A7F3D0';
-    document.getElementById('fichaResult').innerHTML = '<span style="color:#065F46;">✅ <strong>' + name + '</strong> — ' + cargo + '</span>';
-    
     // Track ficha change
     const fichaInput = document.querySelector('.field-input[data-key="FICHA USUARIO"]');
     if (fichaInput) trackChange(fichaInput);
     
-    showToast('👤 Usuario actualizado: ' + name.split(',')[0]);
+    showToast('👤 Usuario y organización actualizados: ' + name.split(',')[0]);
   } else {
     resultDiv.style.display = 'block';
     resultDiv.style.background = '#FFFBEB';
