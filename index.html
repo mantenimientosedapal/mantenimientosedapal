@@ -2747,10 +2747,10 @@ function exportRecord() {
   // Cell: rounded rect with label on top + value below
   function cell(x,y,w,h,label,value,bg,bd) {
     rr(x,y,w,h,1.5, bg||CELL_BG, bd||CELL_BD);
-    fn('normal',5); sT(LBL);
-    doc.text(label, x+3, y+4.5);
-    fn('normal',7); sT(VAL);
-    doc.text(String(value||'').substring(0,Math.floor(w/2.2)), x+3, y+h-2.5);
+    fn('normal',4.5); sT(LBL);
+    doc.text(label, x+3, y+3.5);
+    fn('normal',6.5); sT(VAL);
+    doc.text(String(value||'').substring(0,Math.floor(w/2)), x+3, y+h-1.5);
   }
 
   // ===== TOP BAR =====
@@ -2792,18 +2792,18 @@ function exportRecord() {
   // ===== 1. INFORMACIÓN =====
   secHdr('1','Informaci\u00f3n del usuario y \u00e1rea');
   const hw = CW/2 - 1.5;
-  cell(ML, y, hw, 7.5, 'USUARIO', gv('USUARIO ASIGNADO')); cell(ML+hw+3, y, hw, 7.5, 'FICHA', gv('FICHA USUARIO')); y+=8.5;
-  cell(ML, y, hw, 7.5, 'CARGO', gv('CARGO')); cell(ML+hw+3, y, hw, 7.5, 'TIPO DE ASIGNACI\u00d3N', gv('TIPO ASIGNACIÓN')); y+=8.5;
-  cell(ML, y, hw, 7.5, 'USUARIO OTRO', ''); cell(ML+hw+3, y, hw, 7.5, 'GERENCIA', gv('GERENCIA')); y+=8.5;
-  cell(ML, y, hw, 7.5, 'SEDE O LOCAL', gv('SEDE')); cell(ML+hw+3, y, hw, 7.5, 'EQUIPO FUNCIONAL', gv('EQUIPO FUNCIONAL')); y+=8.5;
-  cell(ML, y, hw, 7.5, 'REFERENCIA', gv('REFERENCIA UBICACIÓN')); cell(ML+hw+3, y, hw, 7.5, 'GRUPO FUNCIONAL', gv('GRUPO FUNCIONAL')); y+=8.5;
+  cell(ML, y, hw, 9, 'USUARIO', gv('USUARIO ASIGNADO')); cell(ML+hw+3, y, hw, 9, 'FICHA', gv('FICHA USUARIO')); y+=10;
+  cell(ML, y, hw, 9, 'CARGO', gv('CARGO')); cell(ML+hw+3, y, hw, 9, 'TIPO DE ASIGNACI\u00d3N', gv('TIPO ASIGNACIÓN')); y+=10;
+  cell(ML, y, hw, 9, 'USUARIO OTRO', ''); cell(ML+hw+3, y, hw, 9, 'GERENCIA', gv('GERENCIA')); y+=10;
+  cell(ML, y, hw, 9, 'SEDE O LOCAL', gv('SEDE')); cell(ML+hw+3, y, hw, 9, 'EQUIPO FUNCIONAL', gv('EQUIPO FUNCIONAL')); y+=10;
+  cell(ML, y, hw, 9, 'REFERENCIA', gv('REFERENCIA UBICACIÓN')); cell(ML+hw+3, y, hw, 9, 'GRUPO FUNCIONAL', gv('GRUPO FUNCIONAL')); y+=10;
 
   // ===== 2. INVENTARIO =====
   secHdr('2','Inventario del equipo asignado al usuario');
   const qw = CW/4-1;
-  cell(ML, y, qw, 7.5, 'C. INVENTARIO', gv('CÓDIGO INVENTARIO')); cell(ML+qw+1.3, y, qw, 7.5, 'CONDICI\u00d3N', ''); cell(ML+(qw+1.3)*2, y, qw, 7.5, 'ESTADO', ''); cell(ML+(qw+1.3)*3, y, qw, 7.5, 'EN USO / SIN USO', 'En uso'); y+=8.5;
+  cell(ML, y, qw, 9, 'C. INVENTARIO', gv('CÓDIGO INVENTARIO')); cell(ML+qw+1.3, y, qw, 9, 'CONDICI\u00d3N', ''); cell(ML+(qw+1.3)*2, y, qw, 9, 'ESTADO', ''); cell(ML+(qw+1.3)*3, y, qw, 9, 'EN USO / SIN USO', 'En uso'); y+=10;
   const fw = CW/5-0.8;
-  cell(ML, y, fw, 7.5, 'CATEGOR\u00cdA', gv('CATEGORÍA')); cell(ML+(fw+1)*1, y, fw, 7.5, 'TIPO', gv('TIPO DE EQUIPO')); cell(ML+(fw+1)*2, y, fw, 7.5, 'MARCA', gv('MARCA')); cell(ML+(fw+1)*3, y, fw, 7.5, 'MODELO', gv('MODELO')); cell(ML+(fw+1)*4, y, fw, 7.5, 'SERIE', gv('SERIE EQUIPO')); y+=9;
+  cell(ML, y, fw, 9, 'CATEGOR\u00cdA', gv('CATEGORÍA')); cell(ML+(fw+1)*1, y, fw, 9, 'TIPO', gv('TIPO DE EQUIPO')); cell(ML+(fw+1)*2, y, fw, 9, 'MARCA', gv('MARCA')); cell(ML+(fw+1)*3, y, fw, 9, 'MODELO', gv('MODELO')); cell(ML+(fw+1)*4, y, fw, 9, 'SERIE', gv('SERIE EQUIPO')); y+=10;
 
   // Periféricos header
   rr(ML, y, CW, 4, 1, PERI_BG, CELL_BD);
@@ -2811,13 +2811,13 @@ function exportRecord() {
 
   function periRow(name, cols) {
     const nw = 17;
-    rr(ML, y, nw, 7.5, 1, PERI_BG, CELL_BD);
+    rr(ML, y, nw, 9, 1, PERI_BG, CELL_BD);
     fn('bold',6); sT(BLU2); doc.text(name, ML+2, y+5);
     const pw = (CW-nw-3)/cols.length;
     cols.forEach((c,i) => {
-      cell(ML+nw+1.5+pw*i, y, pw-0.5, 7.5, c[0], c[1]);
+      cell(ML+nw+1.5+pw*i, y, pw-0.5, 9, c[0], c[1]);
     });
-    y+=8;
+    y+=10;
   }
   periRow('Monitor',[['MARCA',gv('MARCA MONITOR 1')],['MODELO',gv('MODELO MONITOR 1')],['SERIE',gv('SERIE MONITOR 1')],['TAMA\u00d1O',gv('PULGADAS MONITOR 1')]]);
   periRow('Teclado',[['MARCA',gv('MARCA TECLADO')],['SERIE',gv('SERIE TECLADO')]]);
@@ -2825,9 +2825,9 @@ function exportRecord() {
 
   // ===== 3. DATOS ADICIONALES =====
   secHdr('3','Datos adicionales del Equipo');
-  cell(ML, y, qw, 7.5, 'UND. \u00d3PTICA', ''); cell(ML+qw+1.3, y, qw, 7.5, 'PROCESADOR', gv('PROCESADOR')); cell(ML+(qw+1.3)*2, y, qw, 7.5, 'MEMORIA RAM', gv('MEMORIA RAM')); cell(ML+(qw+1.3)*3, y, qw, 7.5, 'DISCO DURO', gv('ALMACENAMIENTO')); y+=8.5;
+  cell(ML, y, qw, 9, 'UND. \u00d3PTICA', ''); cell(ML+qw+1.3, y, qw, 9, 'PROCESADOR', gv('PROCESADOR')); cell(ML+(qw+1.3)*2, y, qw, 9, 'MEMORIA RAM', gv('MEMORIA RAM')); cell(ML+(qw+1.3)*3, y, qw, 9, 'DISCO DURO', gv('ALMACENAMIENTO')); y+=10;
   const tw = CW/3-1;
-  cell(ML, y, tw, 7.5, 'DIRECCI\u00d3N IP', gv('DIRECCIÓN IP')); cell(ML+tw+1.5, y, tw, 7.5, 'HOSTNAME', gv('NOMBRE HOST')); cell(ML+(tw+1.5)*2, y, tw, 7.5, 'SISTEMA OPERATIVO', ''); y+=8.5;
+  cell(ML, y, tw, 9, 'DIRECCI\u00d3N IP', gv('DIRECCIÓN IP')); cell(ML+tw+1.5, y, tw, 9, 'HOSTNAME', gv('NOMBRE HOST')); cell(ML+(tw+1.5)*2, y, tw, 9, 'SISTEMA OPERATIVO', ''); y+=10;
 
   // ===== 4. CHECKLIST =====
   secHdr('4','Actividades de Mantenimiento realizados (Check list)');
