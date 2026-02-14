@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 
 <style>
 :root {
@@ -1284,7 +1285,7 @@ body {
     <p id="successMessage">El equipo ha sido registrado correctamente.</p>
     <button class="btn btn-primary btn-block" onclick="closeModal(); resetForm();">Registrar Otro Equipo</button>
     <button class="btn btn-outline btn-block" onclick="exportRecord()" style="margin-top:6px;">
-      📄 Descargar Comprobante
+      📄 Descargar RMP (PDF)
     </button>
   </div>
 </div>
@@ -2246,39 +2247,25 @@ async function sendToGoogleSheets(record) {
   }).filter(Boolean).join(' | ');
 
   try {
-    // Use form-encoded POST which Google Apps Script handles better
-    const formData = new URLSearchParams();
-    formData.append('data', JSON.stringify(payload));
+    // Send as JSON string via form-encoded POST
+    const payloadStr = JSON.stringify(payload);
     
     const resp = await fetch(url, {
       method: 'POST',
-      body: formData
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'data=' + encodeURIComponent(payloadStr)
     });
     
-    const result = await resp.json();
-    if (result.status === 'ok') {
-      showToast('☁️ Registro enviado a Google Sheets ✅');
-    } else {
-      showToast('⚠️ Error al guardar: ' + (result.message || ''));
-    }
+    showToast('☁️ Registro enviado a Google Sheets ✅');
   } catch(err) {
-    // Fallback: try no-cors mode (won't get response but data may arrive)
+    console.error('Error sending to Sheets:', err);
+    showToast('⚠️ No se pudo enviar a Google Sheets');
     try {
-      await fetch(url, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: new URLSearchParams({ data: JSON.stringify(payload) })
-      });
-      showToast('☁️ Registro enviado (sin confirmación)');
-    } catch(err2) {
-      console.error('Error sending to Sheets:', err2);
-      showToast('⚠️ No se pudo enviar a Google Sheets');
-      try {
-        const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
-        queue.push(payload);
-        localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
-      } catch(e) {}
-    }
+      const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
+      queue.push(payload);
+      localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
+    } catch(e) {}
   }
 }
 
@@ -2544,41 +2531,293 @@ function renderHistory() {
 function exportRecord() {
   if (APP.history.length === 0) return;
   const last = APP.history[0];
+  const eq = last.equipment;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const W = 210, H = 297;
+  const ML = 12, MR = 12; // margins
+  const CW = W - ML - MR; // content width
+  let y = 10;
 
-  const content = `
-╔══════════════════════════════════════════════════════════════╗
-║     SEDAPAL - COMPROBANTE DE MANTENIMIENTO PREVENTIVO       ║
-║                   GGSE - ETIC                               ║
-╚══════════════════════════════════════════════════════════════╝
+  const gv = (key) => findFieldValue(eq, key) || '';
+  const cat = gv('CATEGORÍA').toUpperCase();
+  const isPC = cat.includes('PC') || cat.includes('LAPTOP') || cat.includes('WORKSTATION') || cat.includes('WS');
+  const isImpresora = cat.includes('IMPRESORA') || cat.includes('PLOTTER');
+  const isEscaner = cat.includes('SCANNER') || cat.includes('ESCANER');
+  const isTablet = cat.includes('TABLET');
 
-FECHA: ${new Date(last.timestamp).toLocaleString('es-PE')}
-TÉCNICO: ${last.technician}
+  // Helper functions
+  function setFont(style, size) { doc.setFont('helvetica', style); doc.setFontSize(size); }
+  function drawCell(x, y, w, h, text, opts = {}) {
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.3);
+    if (opts.fill) { doc.setFillColor(...(opts.fillColor || [240,244,248])); doc.rect(x, y, w, h, 'FD'); }
+    else { doc.rect(x, y, w, h); }
+    setFont(opts.bold ? 'bold' : 'normal', opts.size || 7);
+    doc.setTextColor(opts.color ? opts.color[0] : 0, opts.color ? opts.color[1] : 0, opts.color ? opts.color[2] : 0);
+    const tx = opts.align === 'center' ? x + w/2 : x + 1.5;
+    const ty = y + h/2 + (opts.size || 7) * 0.12;
+    doc.text(String(text || ''), tx, ty, { align: opts.align || 'left', maxWidth: w - 3 });
+  }
+  function drawHeader(x, y, w, h, text) { drawCell(x, y, w, h, text, { fill: true, fillColor: [0,87,168], bold: true, size: 7, color: [255,255,255] }); }
+  function drawLabel(x, y, w, h, text) { drawCell(x, y, w, h, text, { fill: true, fillColor: [240,244,248], bold: true, size: 6.5 }); }
+  function drawValue(x, y, w, h, text) { drawCell(x, y, w, h, text, { size: 7 }); }
+  function drawCheck(x, y, checked) {
+    doc.setDrawColor(0); doc.setLineWidth(0.3);
+    doc.rect(x, y, 3.5, 3.5);
+    if (checked) { setFont('bold', 8); doc.text('✓', x + 0.7, y + 3); }
+  }
 
-${FIELD_GROUPS.map(g => `── ${g.name} ${'─'.repeat(Math.max(0, 50 - g.name.length))}
-${g.fields.map(f => `${f.label}: ${findFieldValue(last.equipment, f.key) || '—'}`).join('\n')}`).join('\n\n')}
+  // ===== HEADER =====
+  setFont('bold', 14);
+  doc.setTextColor(0, 87, 168);
+  doc.text('REPORTE DE MANTENIMIENTO PREVENTIVO', W/2, y + 5, { align: 'center' });
+  setFont('normal', 9);
+  doc.text('(RMP)', W/2, y + 10, { align: 'center' });
+  
+  // Report # and Date
+  const rh = 6;
+  drawLabel(W - MR - 50, y, 25, rh, 'Reporte Nº');
+  drawValue(W - MR - 25, y, 25, rh, last.code || '');
+  drawLabel(W - MR - 50, y + rh, 25, rh, 'Fecha:');
+  drawValue(W - MR - 25, y + rh, 25, rh, new Date(last.timestamp).toLocaleDateString('es-PE'));
+  
+  // SEDAPAL logo text
+  setFont('bold', 8);
+  doc.setTextColor(0, 87, 168);
+  doc.text('SEDAPAL', ML + 2, y + 5);
+  setFont('normal', 6);
+  doc.setTextColor(100, 100, 100);
+  doc.text('GGSE / ETIC', ML + 2, y + 9);
+  
+  y += 18;
+  doc.setTextColor(0, 0, 0);
 
-── CAMBIOS REALIZADOS ────────────────────────────────────────
-${last.changes.length > 0 ? last.changes.map(c => `• ${c.field}: "${c.original}" → "${c.updated}"`).join('\n') : 'Ninguno — Datos coinciden con la base de datos'}
+  // ===== 1. INFORMACIÓN DEL USUARIO Y ÁREA =====
+  drawHeader(ML, y, CW, 5, '1. Información del usuario y área');
+  y += 5;
+  const rr = 5.5;
+  const hw = CW / 2;
+  
+  drawLabel(ML, y, 20, rr, 'Usuario:'); drawValue(ML + 20, y, hw - 20, rr, gv('USUARIO ASIGNADO'));
+  drawLabel(ML + hw, y, 15, rr, 'Ficha:'); drawValue(ML + hw + 15, y, hw - 15, rr, gv('FICHA USUARIO'));
+  y += rr;
+  drawLabel(ML, y, 20, rr, 'Gerencia:'); drawValue(ML + 20, y, hw - 20, rr, gv('GERENCIA'));
+  drawLabel(ML + hw, y, 22, rr, 'Sede o Local:'); drawValue(ML + hw + 22, y, hw - 22, rr, gv('SEDE'));
+  y += rr;
+  drawLabel(ML, y, 20, rr, 'Equipo:'); drawValue(ML + 20, y, hw - 20, rr, gv('EQUIPO FUNCIONAL'));
+  drawLabel(ML + hw, y, 22, rr, 'Referencia:'); drawValue(ML + hw + 22, y, hw - 22, rr, gv('REFERENCIA UBICACIÓN'));
+  y += rr;
+  drawLabel(ML, y, 28, rr, 'Grupo funcional:'); drawValue(ML + 28, y, CW - 28, rr, gv('GRUPO FUNCIONAL'));
+  y += rr + 2;
 
-── CONFORMIDAD ───────────────────────────────────────────────
-USUARIO: ${last.userName}
-FICHA: ${last.userFicha || 'N/A'}
-CARGO: ${last.userCargo || 'N/A'}
-ESTADO: ${last.status}
-${last.observations ? 'OBSERVACIONES: ' + last.observations : ''}
+  // ===== 2. INVENTARIO DEL EQUIPO =====
+  drawHeader(ML, y, CW, 5, '2. Inventario del equipo asignado al usuario');
+  y += 5;
+  
+  // Equipment main row
+  const cols5 = CW / 5;
+  drawLabel(ML, y, cols5, rr, 'C. de Inventario'); drawLabel(ML + cols5, y, cols5, rr, 'Condición'); drawLabel(ML + cols5*2, y, cols5, rr, 'Estado');
+  drawLabel(ML + cols5*3, y, cols5, rr, 'En uso'); drawLabel(ML + cols5*4, y, cols5, rr, 'Sin uso');
+  y += rr;
+  drawValue(ML, y, cols5, rr, gv('CÓDIGO INVENTARIO'));
+  drawValue(ML + cols5, y, cols5, rr, ''); // condición
+  drawValue(ML + cols5*2, y, cols5, rr, ''); // estado
+  drawCheck(ML + cols5*3 + 10, y + 1, true); // En uso
+  drawCheck(ML + cols5*4 + 10, y + 1, false); // Sin uso
+  y += rr;
 
-FIRMA: [Registrada digitalmente]
-══════════════════════════════════════════════════════════════
-  `.trim();
+  const cols4e = CW / 5;
+  drawLabel(ML, y, cols4e, rr, 'Categoría'); drawLabel(ML + cols4e, y, cols4e, rr, 'Tipo de Equipo');
+  drawLabel(ML + cols4e*2, y, cols4e, rr, 'Marca'); drawLabel(ML + cols4e*3, y, cols4e, rr, 'Modelo'); drawLabel(ML + cols4e*4, y, cols4e, rr, 'Serie');
+  y += rr;
+  drawValue(ML, y, cols4e, rr, gv('CATEGORÍA')); drawValue(ML + cols4e, y, cols4e, rr, gv('TIPO DE EQUIPO'));
+  drawValue(ML + cols4e*2, y, cols4e, rr, gv('MARCA')); drawValue(ML + cols4e*3, y, cols4e, rr, gv('MODELO')); drawValue(ML + cols4e*4, y, cols4e, rr, gv('SERIE EQUIPO'));
+  y += rr + 1;
 
-  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `Mantenimiento_${last.code}_${new Date().toISOString().slice(0,10)}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('📄 Comprobante descargado');
+  // Peripherals
+  const pcols = [25, 30, 30, 35, CW - 120];
+  drawLabel(ML, y, pcols[0], rr, 'Periféricos:'); drawLabel(ML + pcols[0], y, pcols[1], rr, 'Marca'); drawLabel(ML + pcols[0] + pcols[1], y, pcols[2], rr, 'Modelo'); drawLabel(ML + pcols[0] + pcols[1] + pcols[2], y, pcols[3], rr, 'Serie'); drawLabel(ML + pcols[0] + pcols[1] + pcols[2] + pcols[3], y, pcols[4], rr, 'Tipo/Tamaño');
+  y += rr;
+  // Monitor
+  drawLabel(ML, y, pcols[0], rr, 'Monitor');
+  drawValue(ML + pcols[0], y, pcols[1], rr, gv('MARCA MONITOR 1'));
+  drawValue(ML + pcols[0] + pcols[1], y, pcols[2], rr, gv('MODELO MONITOR 1'));
+  drawValue(ML + pcols[0] + pcols[1] + pcols[2], y, pcols[3], rr, gv('SERIE MONITOR 1'));
+  drawValue(ML + pcols[0] + pcols[1] + pcols[2] + pcols[3], y, pcols[4], rr, gv('PULGADAS MONITOR 1'));
+  y += rr;
+  // Teclado
+  drawLabel(ML, y, pcols[0], rr, 'Teclado');
+  drawValue(ML + pcols[0], y, pcols[1], rr, gv('MARCA TECLADO'));
+  drawValue(ML + pcols[0] + pcols[1], y, pcols[2], rr, gv('TIPO TECLADO'));
+  drawValue(ML + pcols[0] + pcols[1] + pcols[2], y, pcols[3], rr, gv('SERIE TECLADO'));
+  drawValue(ML + pcols[0] + pcols[1] + pcols[2] + pcols[3], y, pcols[4], rr, '');
+  y += rr;
+  // Mouse
+  drawLabel(ML, y, pcols[0], rr, 'Mouse');
+  drawValue(ML + pcols[0], y, pcols[1], rr, gv('MARCA MOUSE'));
+  drawValue(ML + pcols[0] + pcols[1], y, pcols[2], rr, gv('TIPO MOUSE'));
+  drawValue(ML + pcols[0] + pcols[1] + pcols[2], y, pcols[3], rr, gv('SERIE MOUSE'));
+  drawValue(ML + pcols[0] + pcols[1] + pcols[2] + pcols[3], y, pcols[4], rr, '');
+  y += rr + 2;
+
+  // ===== 3. DATOS ADICIONALES =====
+  drawHeader(ML, y, CW, 5, '3. Datos adicionales del Equipo');
+  y += 5;
+  const dcols = CW / 7;
+  ['Und. Óptica', 'Procesador', 'Memoria RAM', 'Disco Duro', 'Dirección IP', 'Hostname', 'Sistema Operativo'].forEach((lbl, i) => {
+    drawLabel(ML + dcols * i, y, dcols, rr, lbl);
+  });
+  y += rr;
+  ['', gv('PROCESADOR'), gv('MEMORIA RAM'), gv('ALMACENAMIENTO'), gv('DIRECCIÓN IP'), gv('NOMBRE HOST'), ''].forEach((val, i) => {
+    drawValue(ML + dcols * i, y, dcols, rr, val);
+  });
+  y += rr + 2;
+
+  // ===== 4. ACTIVIDADES DE MANTENIMIENTO =====
+  drawHeader(ML, y, CW, 5, '4. Actividades de Mantenimiento realizados (Check list)');
+  y += 5;
+
+  const chkH = 5;
+  const colW3 = CW / 3;
+
+  if (isPC) {
+    drawHeader(ML, y, colW3, 5, 'PC / WS / LAPTOP');
+    drawHeader(ML + colW3, y, colW3, 5, 'IMPRESORA / PLOTTER');
+    drawHeader(ML + colW3*2, y, colW3, 5, 'ESCÁNER');
+    y += 5;
+    const pcItems = [
+      '1. Diagnóstico previo del estado del equipo',
+      '2. Limpieza de componentes internos',
+      '3. Limpieza de dispositivos (monitor, teclado, mouse)',
+      '4. Limpieza de case externo',
+      '5. Mantenimiento Lógico: a) Desfrag HD b) Elim temporales',
+      '6. Antivirus F-Secure',
+      '7. Bizagi',
+      '8. Agente Discovery',
+      '9. HostName',
+      '10. Pruebas de Operatividad'
+    ];
+    const impItems = [
+      '1. Diagnóstico previo del estado',
+      '2. Identificación de estado de consumibles',
+      '3. Limpieza componentes internos',
+      '4. Lubricación de partes mecánicas',
+      '5. Limpieza externa de equipo',
+      '6. Pruebas de Operatividad',
+      '', '', '', ''
+    ];
+    const escItems = [
+      '1. Diagnóstico previo del estado',
+      '2. Limpieza interna de partes mecánicas',
+      '3. Limpieza externa de equipo',
+      '4. Pruebas de Operatividad',
+      '', '', '', '', '', ''
+    ];
+    for (let i = 0; i < 10; i++) {
+      [pcItems[i], impItems[i], escItems[i]].forEach((item, col) => {
+        const x = ML + colW3 * col;
+        drawCell(x, y, colW3 - 5, chkH, item, { size: 5.5 });
+        if (item) drawCheck(x + colW3 - 5, y + 0.7, isPC && col === 0);
+      });
+      y += chkH;
+    }
+  } else if (isImpresora) {
+    drawHeader(ML, y, CW, 5, 'IMPRESORA / PLOTTER');
+    y += 5;
+    ['1. Diagnóstico previo del estado del equipo', '2. Identificación de estado de consumibles',
+     '3. Limpieza de componentes internos (aspirado, sopleteado)', '4. Lubricación de partes mecánicas',
+     '5. Limpieza externa de equipo', '6. Pruebas de Operatividad'].forEach(item => {
+      drawCell(ML, y, CW - 5, chkH, item, { size: 6 });
+      drawCheck(ML + CW - 5, y + 0.7, true);
+      y += chkH;
+    });
+  } else if (isEscaner) {
+    drawHeader(ML, y, CW, 5, 'ESCÁNER');
+    y += 5;
+    ['1. Diagnóstico previo del estado del equipo', '2. Limpieza interna de partes mecánicas',
+     '3. Limpieza externa de equipo', '4. Pruebas de Operatividad'].forEach(item => {
+      drawCell(ML, y, CW - 5, chkH, item, { size: 6 });
+      drawCheck(ML + CW - 5, y + 0.7, true);
+      y += chkH;
+    });
+  } else if (isTablet) {
+    drawHeader(ML, y, CW, 5, 'TABLET');
+    y += 5;
+    ['1. Diagnóstico previo del estado del equipo', '4. Limpieza de case externo',
+     '7. Pruebas de Operatividad'].forEach(item => {
+      drawCell(ML, y, CW - 5, chkH, item, { size: 6 });
+      drawCheck(ML + CW - 5, y + 0.7, true);
+      y += chkH;
+    });
+  } else {
+    // Default: show PC checklist
+    drawHeader(ML, y, CW, 5, gv('CATEGORÍA') || 'EQUIPO');
+    y += 5;
+    ['1. Diagnóstico previo', '2. Limpieza interna', '3. Limpieza externa', '4. Pruebas de Operatividad'].forEach(item => {
+      drawCell(ML, y, CW - 5, chkH, item, { size: 6 });
+      drawCheck(ML + CW - 5, y + 0.7, true);
+      y += chkH;
+    });
+  }
+  y += 2;
+
+  // ===== 5. OBSERVACIONES =====
+  drawHeader(ML, y, CW, 5, '5. Observaciones M. Preventivo / Cambios Realizados');
+  y += 5;
+  const obsText = last.changes.length > 0 
+    ? last.changes.map(c => c.field + ': ' + c.original + ' -> ' + c.updated).join(' | ')
+    : (last.observations || 'Sin observaciones');
+  drawCell(ML, y, CW, 12, obsText, { size: 6.5 });
+  y += 14;
+
+  // ===== 6. ENCUESTA DE CALIDAD =====
+  if (y < H - 60) {
+    drawHeader(ML, y, CW, 5, '6. Encuesta de Calidad de servicio (llenado por el usuario)');
+    y += 5;
+    const escalaW = CW - 80;
+    drawCell(ML, y, 80, rr, 'Criterio', { fill: true, fillColor: [240,244,248], bold: true, size: 6 });
+    ['1','2','3','4','5'].forEach((n, i) => { drawCell(ML + 80 + i * (escalaW/5), y, escalaW/5, rr, n, { align: 'center', size: 6, fill: true, fillColor: [240,244,248] }); });
+    y += rr;
+    ['Presentación y Trato del Personal Técnico', 'Conformidad del Usuario con el mantenimiento'].forEach(item => {
+      drawCell(ML, y, 80, rr, item, { size: 5.5 });
+      ['1','2','3','4','5'].forEach((n, i) => {
+        drawCell(ML + 80 + i * (escalaW/5), y, escalaW/5, rr, '', {});
+        drawCheck(ML + 80 + i * (escalaW/5) + (escalaW/5)/2 - 1.75, y + 1, false);
+      });
+      y += rr;
+    });
+    y += 2;
+  }
+
+  // ===== 7 & 8. FIRMAS =====
+  if (y > H - 35) { doc.addPage(); y = 15; }
+  
+  const fW = CW / 2 - 2;
+  drawHeader(ML, y, fW, 5, '7. Técnico de Mantenimiento Preventivo');
+  drawHeader(ML + fW + 4, y, fW, 5, '8. Conformidad de Usuario');
+  y += 5;
+  
+  // Técnico
+  drawCell(ML, y, fW, 20, '', {});
+  setFont('normal', 7); doc.text('FIRMA', ML + 3, y + 4);
+  setFont('normal', 8); doc.text(last.technician || '', ML + 3, y + 15);
+  setFont('bold', 6); doc.text('NOMBRES', ML + 3, y + 18.5);
+
+  // Usuario
+  drawCell(ML + fW + 4, y, fW, 20, '', {});
+  setFont('normal', 7); doc.text('FIRMA', ML + fW + 7, y + 4);
+  
+  // Draw signature if available
+  if (last.signature) {
+    try { doc.addImage(last.signature, 'PNG', ML + fW + 10, y + 2, fW - 15, 12); } catch(e) {}
+  }
+  setFont('normal', 8); doc.text(last.userName || '', ML + fW + 7, y + 15);
+  setFont('bold', 6); doc.text('NOMBRES', ML + fW + 7, y + 18.5);
+
+  // ===== SAVE =====
+  doc.save('RMP_' + (gv('CÓDIGO INVENTARIO') || last.code) + '_' + new Date().toISOString().slice(0,10) + '.pdf');
+  showToast('📄 RMP descargado en PDF');
 }
 
 // ===== UTILITIES =====
