@@ -2921,25 +2921,25 @@ function exportRecord() {
   y += 2;
 
   // ===== 7 & 8. FIRMAS =====
-  if (y > H-60) { doc.addPage(); y=15; }
+  if (y > H-85) { doc.addPage(); y=15; }
   const fww = CW/2 - 3;
   // Técnico header
   rr(ML, y, fww, 5, 1, FIRMA_HD, FIRMA_BD);
   fn('bold',6.5); sT(BLU2); doc.text('7. T\u00e9cnico de Mant. Preventivo', ML+3, y+3.5);
   // Técnico body
-  rr(ML, y+5, fww, 45, 1, WHITE, FIRMA_BD);
-  if (last.techSignature) { try { doc.addImage(last.techSignature,'PNG',ML+8,y+8,fww-20,30); } catch(e){} }
-  fn('normal',5); sT(LBL); doc.text('NOMBRES:', ML+3, y+44);
-  fn('bold',6.5); sT(VAL); doc.text(last.technician||'', ML+3, y+48);
+  rr(ML, y+5, fww, 68, 1, WHITE, FIRMA_BD);
+  if (last.techSignature) { try { doc.addImage(last.techSignature,'PNG',ML+8,y+8,fww-20,45); } catch(e){} }
+  fn('normal',5); sT(LBL); doc.text('NOMBRES:', ML+3, y+60);
+  fn('bold',6.5); sT(VAL); doc.text(last.technician||'', ML+3, y+64);
 
   // Usuario header
   rr(ML+fww+6, y, fww, 5, 1, FIRMA_HD, FIRMA_BD);
   fn('bold',6.5); sT(BLU2); doc.text('8. Conformidad de Usuario', ML+fww+9, y+3.5);
   // Usuario body
-  rr(ML+fww+6, y+5, fww, 45, 1, WHITE, FIRMA_BD);
-  if (last.signature) { try { doc.addImage(last.signature,'PNG',ML+fww+14,y+8,fww-20,30); } catch(e){} }
-  fn('normal',5); sT(LBL); doc.text('NOMBRES:', ML+fww+9, y+44);
-  fn('bold',6.5); sT(VAL); doc.text(last.userName||'', ML+fww+9, y+48);
+  rr(ML+fww+6, y+5, fww, 68, 1, WHITE, FIRMA_BD);
+  if (last.signature) { try { doc.addImage(last.signature,'PNG',ML+fww+14,y+8,fww-20,45); } catch(e){} }
+  fn('normal',5); sT(LBL); doc.text('NOMBRES:', ML+fww+9, y+60);
+  fn('bold',6.5); sT(VAL); doc.text(last.userName||'', ML+fww+9, y+64);
 
   // ===== FOOTER =====
   sD(BLU); doc.setLineWidth(0.35);
