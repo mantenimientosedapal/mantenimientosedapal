@@ -1225,12 +1225,38 @@ body {
         </div>
       </div>
 
-      <div class="field-label">FIRMA DEL USUARIO</div>
+      <!-- ENCUESTA DE CALIDAD -->
+      <div style="margin-top:16px;padding:12px;background:#F0F7FF;border-radius:12px;border:1px solid #BFDBFE;">
+        <div style="font-weight:700;font-size:14px;color:#0057A8;margin-bottom:8px;">📊 Encuesta de Calidad de Servicio</div>
+        <div style="font-size:11px;color:#64748B;margin-bottom:10px;">1=Muy Malo | 2=Malo | 3=Regular | 4=Bueno | 5=Muy Bueno</div>
+        <div style="margin-bottom:10px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Presentación y Trato del Personal Técnico:</div>
+          <div style="display:flex;gap:8px;" id="surveyTratoGroup">
+            <button type="button" class="survey-btn" onclick="setSurvey('trato',1)" data-val="1" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">1</button>
+            <button type="button" class="survey-btn" onclick="setSurvey('trato',2)" data-val="2" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">2</button>
+            <button type="button" class="survey-btn" onclick="setSurvey('trato',3)" data-val="3" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">3</button>
+            <button type="button" class="survey-btn" onclick="setSurvey('trato',4)" data-val="4" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">4</button>
+            <button type="button" class="survey-btn" onclick="setSurvey('trato',5)" data-val="5" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">5</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Conformidad del Usuario con el mantenimiento:</div>
+          <div style="display:flex;gap:8px;" id="surveyConformidadGroup">
+            <button type="button" class="survey-btn" onclick="setSurvey('conformidad',1)" data-val="1" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">1</button>
+            <button type="button" class="survey-btn" onclick="setSurvey('conformidad',2)" data-val="2" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">2</button>
+            <button type="button" class="survey-btn" onclick="setSurvey('conformidad',3)" data-val="3" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">3</button>
+            <button type="button" class="survey-btn" onclick="setSurvey('conformidad',4)" data-val="4" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">4</button>
+            <button type="button" class="survey-btn" onclick="setSurvey('conformidad',5)" data-val="5" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">5</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-label" style="margin-top:16px;">FIRMA DEL USUARIO</div>
       <div class="signature-area">
         <canvas class="signature-canvas" id="signatureCanvas"></canvas>
         <div class="signature-placeholder" id="sigPlaceholder">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-          <br>Firmar aquí
+          <br>Firmar aquí (Usuario)
         </div>
       </div>
       <div class="signature-actions">
@@ -1239,6 +1265,25 @@ body {
           Limpiar
         </button>
         <button class="btn btn-outline" onclick="undoSignature()">
+          ↩ Deshacer
+        </button>
+      </div>
+
+      <!-- FIRMA DEL TÉCNICO -->
+      <div class="field-label" style="margin-top:16px;">FIRMA DEL TÉCNICO</div>
+      <div class="signature-area">
+        <canvas class="signature-canvas" id="techSignatureCanvas"></canvas>
+        <div class="signature-placeholder" id="techSigPlaceholder">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+          <br>Firmar aquí (Técnico)
+        </div>
+      </div>
+      <div class="signature-actions">
+        <button class="btn btn-outline" onclick="clearTechSignature()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          Limpiar
+        </button>
+        <button class="btn btn-outline" onclick="undoTechSignature()">
           ↩ Deshacer
         </button>
       </div>
@@ -1434,6 +1479,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDate();
   loadConfig();
   initSignature();
+  initTechSignature();
   initEventListeners();
 });
 
@@ -1680,6 +1726,7 @@ async function searchEquipment() {
   if (!APP.config.connected && !APP.isDemo && !APP.csvData) { showError('Sin datos', 'Cargue un archivo CSV o configure Google Sheets primero. Toque ⚙️ arriba.'); return; }
 
   showLoader(true);
+  APP.startTime = new Date().toISOString();
   document.getElementById('equipmentSection').style.display = 'none';
 
   try {
@@ -2156,6 +2203,113 @@ function undoSignature() {
   redrawSignature();
 }
 
+// ===== SURVEY =====
+const APP_SURVEY = { trato: 0, conformidad: 0 };
+function setSurvey(type, val) {
+  APP_SURVEY[type] = val;
+  const groupId = type === 'trato' ? 'surveyTratoGroup' : 'surveyConformidadGroup';
+  document.getElementById(groupId).querySelectorAll('button').forEach(btn => {
+    const bv = parseInt(btn.dataset.val);
+    if (bv <= val) {
+      btn.style.background = '#0057A8';
+      btn.style.color = '#FFF';
+      btn.style.borderColor = '#0057A8';
+    } else {
+      btn.style.background = '#FFF';
+      btn.style.color = '#000';
+      btn.style.borderColor = '#CBD5E1';
+    }
+  });
+}
+
+// ===== TECH SIGNATURE =====
+let techSignatureStrokes = [];
+let techCurrentStroke = [];
+let techHasSigned = false;
+
+function initTechSignature() {
+  const canvas = document.getElementById('techSignatureCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * 2;
+    canvas.height = rect.height * 2;
+    ctx.scale(2, 2);
+    ctx.strokeStyle = '#0057A8';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    redrawTechSignature();
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let drawing = false;
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : e;
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+  }
+  function startDraw(e) {
+    e.preventDefault(); drawing = true;
+    techCurrentStroke = [getPos(e)];
+    document.getElementById('techSigPlaceholder').style.display = 'none';
+  }
+  function draw(e) {
+    if (!drawing) return; e.preventDefault();
+    const pos = getPos(e); techCurrentStroke.push(pos);
+    ctx.beginPath();
+    if (techCurrentStroke.length >= 2) {
+      ctx.moveTo(techCurrentStroke[techCurrentStroke.length-2].x, techCurrentStroke[techCurrentStroke.length-2].y);
+      ctx.lineTo(pos.x, pos.y); ctx.stroke();
+    }
+  }
+  function endDraw(e) {
+    if (!drawing) return; e.preventDefault(); drawing = false;
+    if (techCurrentStroke.length > 1) { techSignatureStrokes.push([...techCurrentStroke]); techHasSigned = true; canvas.classList.add('signed'); }
+    techCurrentStroke = [];
+  }
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', endDraw);
+  canvas.addEventListener('mouseleave', endDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', endDraw, { passive: false });
+}
+
+function redrawTechSignature() {
+  const canvas = document.getElementById('techSignatureCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = '#0057A8'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  techSignatureStrokes.forEach(stroke => {
+    if (stroke.length < 2) return;
+    ctx.beginPath(); ctx.moveTo(stroke[0].x, stroke[0].y);
+    for (let i = 1; i < stroke.length; i++) ctx.lineTo(stroke[i].x, stroke[i].y);
+    ctx.stroke();
+  });
+}
+
+function clearTechSignature() {
+  techSignatureStrokes = []; techHasSigned = false;
+  const canvas = document.getElementById('techSignatureCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas.classList.remove('signed');
+  document.getElementById('techSigPlaceholder').style.display = 'block';
+}
+
+function undoTechSignature() {
+  if (techSignatureStrokes.length === 0) return;
+  techSignatureStrokes.pop();
+  if (techSignatureStrokes.length === 0) { techHasSigned = false; document.getElementById('techSignatureCanvas').classList.remove('signed'); document.getElementById('techSigPlaceholder').style.display = 'block'; }
+  redrawTechSignature();
+}
+
 // ===== SUBMIT =====
 function submitMaintenance() {
   const techName = document.getElementById('techName').value.trim();
@@ -2179,6 +2333,7 @@ function submitMaintenance() {
 
   const record = {
     timestamp: new Date().toISOString(),
+    startTime: APP.startTime || new Date().toISOString(),
     technician: techName,
     code: findFieldValue(APP.currentEquipment, 'CÓDIGO INVENTARIO'),
     equipment: updatedEquipment,
@@ -2189,7 +2344,9 @@ function submitMaintenance() {
     photos: { ...APP_PHOTOS },
     status,
     observations: obs,
-    signature: document.getElementById('signatureCanvas').toDataURL('image/png')
+    survey: { ...APP_SURVEY },
+    signature: document.getElementById('signatureCanvas').toDataURL('image/png'),
+    techSignature: document.getElementById('techSignatureCanvas').toDataURL('image/png')
   };
 
   APP.history.unshift(record);
@@ -2482,6 +2639,7 @@ function resetForm() {
   APP.currentEquipment = null;
   APP.originalData = null;
   APP.changes = [];
+  APP.startTime = null;
   document.getElementById('equipCode').value = '';
   document.getElementById('serialInput').value = '';
   document.getElementById('serialResult').innerHTML = '';
@@ -2497,6 +2655,14 @@ function resetForm() {
   document.getElementById('obsGroup').style.display = 'none';
   document.getElementById('equipmentSection').style.display = 'none';
   clearSignature();
+  clearTechSignature();
+  APP_SURVEY.trato = 0;
+  APP_SURVEY.conformidad = 0;
+  ['surveyTratoGroup','surveyConformidadGroup'].forEach(id => {
+    document.getElementById(id)?.querySelectorAll('button').forEach(btn => {
+      btn.style.background = '#FFF'; btn.style.color = '#000'; btn.style.borderColor = '#CBD5E1';
+    });
+  });
   document.getElementById('equipCode').focus();
 }
 
@@ -2580,28 +2746,21 @@ function exportRecord() {
   }
 
   // ===== HEADER =====
-  setFont('bold', 14);
-  doc.setTextColor(0, 87, 168);
-  doc.text('REPORTE DE MANTENIMIENTO PREVENTIVO', W/2, y + 5, { align: 'center' });
-  setFont('normal', 9);
-  doc.text('(RMP)', W/2, y + 10, { align: 'center' });
+  // Blue header bar
+  doc.setFillColor(0, 87, 168);
+  doc.rect(ML, y, CW, 12, 'F');
+  setFont('bold', 13); doc.setTextColor(255,255,255);
+  doc.text('REPORTE DE MANTENIMIENTO PREVENTIVO — RMP', W/2, y + 5.5, { align: 'center' });
+  setFont('normal', 7);
+  const startDt = last.startTime ? new Date(last.startTime) : new Date(last.timestamp);
+  const endDt = new Date(last.timestamp);
+  const durMin = Math.round((endDt - startDt) / 60000);
+  const durStr = durMin >= 60 ? Math.floor(durMin/60) + 'h ' + (durMin%60) + 'min' : durMin + 'min';
+  doc.text('SEDAPAL ETIC | RMP-' + (gv('CÓDIGO INVENTARIO') || last.code) + ' | ' + endDt.toLocaleDateString('es-PE') + ' | Técnico: ' + (last.technician || ''), W/2, y + 9.5, { align: 'center' });
+  setFont('normal', 5.5);
+  doc.text('Inicio: ' + startDt.toLocaleString('es-PE') + ' | Fin: ' + endDt.toLocaleString('es-PE') + ' | Duración: ' + durStr, W/2, y + 12, { align: 'center' });
   
-  // Report # and Date
-  const rh = 6;
-  drawLabel(W - MR - 50, y, 25, rh, 'Reporte Nº');
-  drawValue(W - MR - 25, y, 25, rh, last.code || '');
-  drawLabel(W - MR - 50, y + rh, 25, rh, 'Fecha:');
-  drawValue(W - MR - 25, y + rh, 25, rh, new Date(last.timestamp).toLocaleDateString('es-PE'));
-  
-  // SEDAPAL logo text
-  setFont('bold', 8);
-  doc.setTextColor(0, 87, 168);
-  doc.text('SEDAPAL', ML + 2, y + 5);
-  setFont('normal', 6);
-  doc.setTextColor(100, 100, 100);
-  doc.text('GGSE / ETIC', ML + 2, y + 9);
-  
-  y += 18;
+  y += 15;
   doc.setTextColor(0, 0, 0);
 
   // ===== 1. INFORMACIÓN DEL USUARIO Y ÁREA =====
@@ -2613,11 +2772,14 @@ function exportRecord() {
   drawLabel(ML, y, 20, rr, 'Usuario:'); drawValue(ML + 20, y, hw - 20, rr, gv('USUARIO ASIGNADO'));
   drawLabel(ML + hw, y, 15, rr, 'Ficha:'); drawValue(ML + hw + 15, y, hw - 15, rr, gv('FICHA USUARIO'));
   y += rr;
+  drawLabel(ML, y, 20, rr, 'Cargo:'); drawValue(ML + 20, y, hw - 20, rr, gv('CARGO'));
+  drawLabel(ML + hw, y, 30, rr, 'Tipo Asignación:'); drawValue(ML + hw + 30, y, hw - 30, rr, gv('TIPO ASIGNACIÓN'));
+  y += rr;
   drawLabel(ML, y, 20, rr, 'Gerencia:'); drawValue(ML + 20, y, hw - 20, rr, gv('GERENCIA'));
   drawLabel(ML + hw, y, 22, rr, 'Sede o Local:'); drawValue(ML + hw + 22, y, hw - 22, rr, gv('SEDE'));
   y += rr;
-  drawLabel(ML, y, 20, rr, 'Equipo:'); drawValue(ML + 20, y, hw - 20, rr, gv('EQUIPO FUNCIONAL'));
-  drawLabel(ML + hw, y, 22, rr, 'Referencia:'); drawValue(ML + hw + 22, y, hw - 22, rr, gv('REFERENCIA UBICACIÓN'));
+  drawLabel(ML, y, 22, rr, 'Referencia:'); drawValue(ML + 22, y, hw - 22, rr, gv('REFERENCIA UBICACIÓN'));
+  drawLabel(ML + hw, y, 28, rr, 'Equipo Func.:'); drawValue(ML + hw + 28, y, hw - 28, rr, gv('EQUIPO FUNCIONAL'));
   y += rr;
   drawLabel(ML, y, 28, rr, 'Grupo funcional:'); drawValue(ML + 28, y, CW - 28, rr, gv('GRUPO FUNCIONAL'));
   y += rr + 2;
@@ -2690,91 +2852,38 @@ function exportRecord() {
   y += 5;
 
   const chkH = 5;
-  const colW3 = CW / 3;
-
-  if (isPC) {
-    drawHeader(ML, y, colW3, 5, 'PC / WS / LAPTOP');
-    drawHeader(ML + colW3, y, colW3, 5, 'IMPRESORA / PLOTTER');
-    drawHeader(ML + colW3*2, y, colW3, 5, 'ESCÁNER');
-    y += 5;
-    const pcItems = [
-      '1. Diagnóstico previo del estado del equipo',
-      '2. Limpieza de componentes internos',
-      '3. Limpieza de dispositivos (monitor, teclado, mouse)',
-      '4. Limpieza de case externo',
-      '5. Mantenimiento Lógico: a) Desfrag HD b) Elim temporales',
-      '6. Antivirus F-Secure',
-      '7. Bizagi',
-      '8. Agente Discovery',
-      '9. HostName',
-      '10. Pruebas de Operatividad'
-    ];
-    const impItems = [
-      '1. Diagnóstico previo del estado',
-      '2. Identificación de estado de consumibles',
-      '3. Limpieza componentes internos',
-      '4. Lubricación de partes mecánicas',
-      '5. Limpieza externa de equipo',
-      '6. Pruebas de Operatividad',
-      '', '', '', ''
-    ];
-    const escItems = [
-      '1. Diagnóstico previo del estado',
-      '2. Limpieza interna de partes mecánicas',
-      '3. Limpieza externa de equipo',
-      '4. Pruebas de Operatividad',
-      '', '', '', '', '', ''
-    ];
-    for (let i = 0; i < 10; i++) {
-      [pcItems[i], impItems[i], escItems[i]].forEach((item, col) => {
-        const x = ML + colW3 * col;
-        drawCell(x, y, colW3 - 5, chkH, item, { size: 5.5 });
-        if (item) drawCheck(x + colW3 - 5, y + 0.7, isPC && col === 0);
-      });
-      y += chkH;
-    }
-  } else if (isImpresora) {
-    drawHeader(ML, y, CW, 5, 'IMPRESORA / PLOTTER');
-    y += 5;
-    ['1. Diagnóstico previo del estado del equipo', '2. Identificación de estado de consumibles',
-     '3. Limpieza de componentes internos (aspirado, sopleteado)', '4. Lubricación de partes mecánicas',
-     '5. Limpieza externa de equipo', '6. Pruebas de Operatividad'].forEach(item => {
-      drawCell(ML, y, CW - 5, chkH, item, { size: 6 });
-      drawCheck(ML + CW - 5, y + 0.7, true);
-      y += chkH;
+  
+  // Always show all categories in columns like the new RMP format
+  const colW5 = CW / 5;
+  const categories = [
+    { title: 'PC / WS / LAPTOP', items: ['Diagnóstico previo estado equipo', 'Validación Software NO AUTORIZADO', 'Limpieza componentes Externos', 'Validación Antivirus WithSecure', 'Validación Agente Discovery', 'Prueba de Operatividad'] },
+    { title: 'MONITOR', items: ['Diagnóstico previo estado equipo', 'Limpieza externa del equipo', 'Pruebas de Operatividad', '', '', ''] },
+    { title: 'IMPRESORA / PLOTTER', items: ['Diagnóstico previo estado equipo', 'Identif. estado consumibles', 'Limpieza componentes internos', 'Lubricación partes mecánicas', 'Limpieza externa de equipo', 'Pruebas de Operatividad'] },
+    { title: 'SCANNER', items: ['Diagnóstico previo estado equipo', 'Limpieza interna partes mecán.', 'Limpieza externa de equipo', 'Pruebas de Operatividad', '', ''] },
+    { title: 'TABLET', items: ['Diagnóstico previo estado equipo', 'Limpieza de case externo', 'Pruebas de Operatividad', '', '', ''] }
+  ];
+  
+  // Headers
+  categories.forEach((cat, i) => { drawHeader(ML + colW5 * i, y, colW5, 4.5, cat.title); });
+  y += 4.5;
+  
+  // Items rows
+  for (let r = 0; r < 6; r++) {
+    categories.forEach((cat, i) => {
+      const x = ML + colW5 * i;
+      const item = cat.items[r] || '';
+      drawCell(x, y, colW5 - 4, chkH, item, { size: 4.5 });
+      if (item) {
+        const checked = (i === 0 && isPC) || (i === 1) || (i === 2 && isImpresora) || (i === 3 && isEscaner) || (i === 4 && isTablet);
+        drawCheck(x + colW5 - 4, y + 0.7, checked);
+      }
     });
-  } else if (isEscaner) {
-    drawHeader(ML, y, CW, 5, 'ESCÁNER');
-    y += 5;
-    ['1. Diagnóstico previo del estado del equipo', '2. Limpieza interna de partes mecánicas',
-     '3. Limpieza externa de equipo', '4. Pruebas de Operatividad'].forEach(item => {
-      drawCell(ML, y, CW - 5, chkH, item, { size: 6 });
-      drawCheck(ML + CW - 5, y + 0.7, true);
-      y += chkH;
-    });
-  } else if (isTablet) {
-    drawHeader(ML, y, CW, 5, 'TABLET');
-    y += 5;
-    ['1. Diagnóstico previo del estado del equipo', '4. Limpieza de case externo',
-     '7. Pruebas de Operatividad'].forEach(item => {
-      drawCell(ML, y, CW - 5, chkH, item, { size: 6 });
-      drawCheck(ML + CW - 5, y + 0.7, true);
-      y += chkH;
-    });
-  } else {
-    // Default: show PC checklist
-    drawHeader(ML, y, CW, 5, gv('CATEGORÍA') || 'EQUIPO');
-    y += 5;
-    ['1. Diagnóstico previo', '2. Limpieza interna', '3. Limpieza externa', '4. Pruebas de Operatividad'].forEach(item => {
-      drawCell(ML, y, CW - 5, chkH, item, { size: 6 });
-      drawCheck(ML + CW - 5, y + 0.7, true);
-      y += chkH;
-    });
+    y += chkH;
   }
   y += 2;
 
   // ===== 5. OBSERVACIONES =====
-  drawHeader(ML, y, CW, 5, '5. Observaciones M. Preventivo / Cambios Realizados');
+  drawHeader(ML, y, CW, 5, '5. Observaciones de M. Preventivo');
   y += 5;
   const obsText = last.changes.length > 0 
     ? last.changes.map(c => c.field + ': ' + c.original + ' -> ' + c.updated).join(' | ')
@@ -2783,48 +2892,62 @@ function exportRecord() {
   y += 14;
 
   // ===== 6. ENCUESTA DE CALIDAD =====
-  if (y < H - 60) {
-    drawHeader(ML, y, CW, 5, '6. Encuesta de Calidad de servicio (llenado por el usuario)');
-    y += 5;
-    const escalaW = CW - 80;
-    drawCell(ML, y, 80, rr, 'Criterio', { fill: true, fillColor: [240,244,248], bold: true, size: 6 });
-    ['1','2','3','4','5'].forEach((n, i) => { drawCell(ML + 80 + i * (escalaW/5), y, escalaW/5, rr, n, { align: 'center', size: 6, fill: true, fillColor: [240,244,248] }); });
-    y += rr;
-    ['Presentación y Trato del Personal Técnico', 'Conformidad del Usuario con el mantenimiento'].forEach(item => {
-      drawCell(ML, y, 80, rr, item, { size: 5.5 });
-      ['1','2','3','4','5'].forEach((n, i) => {
-        drawCell(ML + 80 + i * (escalaW/5), y, escalaW/5, rr, '', {});
-        drawCheck(ML + 80 + i * (escalaW/5) + (escalaW/5)/2 - 1.75, y + 1, false);
-      });
-      y += rr;
+  drawHeader(ML, y, CW, 5, '6. Encuesta de Calidad de servicio');
+  y += 5;
+  setFont('normal', 6); doc.setTextColor(100,100,100);
+  doc.text('1=Muy Malo | 2=Malo | 3=Regular | 4=Bueno | 5=Muy Bueno', ML + 2, y + 3.5);
+  y += 5;
+  const surveyData = last.survey || { trato: 0, conformidad: 0 };
+  const escalaW = CW - 85;
+  ['Presentación y Trato del Personal Técnico', 'Conformidad del Usuario con el mantenimiento'].forEach((item, idx) => {
+    const val = idx === 0 ? surveyData.trato : surveyData.conformidad;
+    drawCell(ML, y, 85, rr, item + ':', { size: 6 });
+    [1,2,3,4,5].forEach((n, i) => {
+      const cx = ML + 85 + i * (escalaW/5);
+      const cw = escalaW / 5;
+      if (n === val) {
+        drawCell(cx, y, cw, rr, String(n), { fill: true, fillColor: [0,87,168], align: 'center', size: 7, bold: true, color: [255,255,255] });
+      } else {
+        drawCell(cx, y, cw, rr, String(n), { align: 'center', size: 7 });
+      }
     });
-    y += 2;
-  }
+    y += rr;
+  });
+  y += 3;
 
   // ===== 7 & 8. FIRMAS =====
   if (y > H - 35) { doc.addPage(); y = 15; }
   
   const fW = CW / 2 - 2;
-  drawHeader(ML, y, fW, 5, '7. Técnico de Mantenimiento Preventivo');
+  drawHeader(ML, y, fW, 5, '7. Técnico de Mant. Preventivo');
   drawHeader(ML + fW + 4, y, fW, 5, '8. Conformidad de Usuario');
   y += 5;
   
   // Técnico
-  drawCell(ML, y, fW, 20, '', {});
-  setFont('normal', 7); doc.text('FIRMA', ML + 3, y + 4);
-  setFont('normal', 8); doc.text(last.technician || '', ML + 3, y + 15);
-  setFont('bold', 6); doc.text('NOMBRES', ML + 3, y + 18.5);
+  drawCell(ML, y, fW, 22, '', {});
+  setFont('normal', 6); doc.setTextColor(150,150,150); doc.text('FIRMA', ML + 3, y + 3);
+  if (last.techSignature) {
+    try { doc.addImage(last.techSignature, 'PNG', ML + 5, y + 3, fW - 15, 12); } catch(e) {}
+  }
+  doc.setTextColor(0,0,0);
+  setFont('bold', 6); doc.text('NOMBRES:', ML + 3, y + 18);
+  setFont('normal', 7); doc.text(last.technician || '', ML + 3, y + 21);
 
   // Usuario
-  drawCell(ML + fW + 4, y, fW, 20, '', {});
-  setFont('normal', 7); doc.text('FIRMA', ML + fW + 7, y + 4);
-  
-  // Draw signature if available
+  drawCell(ML + fW + 4, y, fW, 22, '', {});
+  setFont('normal', 6); doc.setTextColor(150,150,150); doc.text('FIRMA', ML + fW + 7, y + 3);
   if (last.signature) {
-    try { doc.addImage(last.signature, 'PNG', ML + fW + 10, y + 2, fW - 15, 12); } catch(e) {}
+    try { doc.addImage(last.signature, 'PNG', ML + fW + 10, y + 3, fW - 15, 12); } catch(e) {}
   }
-  setFont('normal', 8); doc.text(last.userName || '', ML + fW + 7, y + 15);
-  setFont('bold', 6); doc.text('NOMBRES', ML + fW + 7, y + 18.5);
+  doc.setTextColor(0,0,0);
+  setFont('bold', 6); doc.text('NOMBRES:', ML + fW + 7, y + 18);
+  setFont('normal', 7); doc.text(last.userName || '', ML + fW + 7, y + 21);
+
+  y += 25;
+  
+  // Footer
+  setFont('italic', 5.5); doc.setTextColor(120,120,120);
+  doc.text('Proyecto MANANTIAL — Mantenimiento Preventivo SEDAPAL ETIC — Derechos Reservados', W/2, H - 6, { align: 'center' });
 
   // ===== SAVE =====
   doc.save('RMP_' + (gv('CÓDIGO INVENTARIO') || last.code) + '_' + new Date().toISOString().slice(0,10) + '.pdf');
