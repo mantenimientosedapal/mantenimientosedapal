@@ -2210,7 +2210,7 @@ function setSurvey(type, val) {
   const groupId = type === 'trato' ? 'surveyTratoGroup' : 'surveyConformidadGroup';
   document.getElementById(groupId).querySelectorAll('button').forEach(btn => {
     const bv = parseInt(btn.dataset.val);
-    if (bv <= val) {
+    if (bv === val) {
       btn.style.background = '#0057A8';
       btn.style.color = '#FFF';
       btn.style.borderColor = '#0057A8';
