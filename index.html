@@ -2709,258 +2709,307 @@ function exportRecord() {
   }
   
   const eq = last.equipment;
-  
   let jsPDFClass;
-  try {
-    jsPDFClass = window.jspdf.jsPDF;
-  } catch(e) {
-    try { jsPDFClass = window.jsPDF; } catch(e2) {}
-  }
-  if (!jsPDFClass) { alert('Error: jsPDF no disponible. Recargue la página.'); return; }
+  try { jsPDFClass = window.jspdf.jsPDF; } catch(e) { try { jsPDFClass = window.jsPDF; } catch(e2) {} }
+  if (!jsPDFClass) { alert('Error: jsPDF no disponible'); return; }
   
   try {
   const doc = new jsPDFClass('p', 'mm', 'a4');
-  const W = 210, H = 297;
-  const ML = 12, MR = 12; // margins
-  const CW = W - ML - MR; // content width
-  let y = 10;
-
+  const W = 210, H = 297, ML = 14, MR = 14;
+  const CW = W - ML - MR;
+  let y = 0;
   const gv = (key) => findFieldValue(eq, key) || '';
   const cat = gv('CATEGORÍA').toUpperCase();
   const isPC = cat.includes('PC') || cat.includes('LAPTOP') || cat.includes('WORKSTATION') || cat.includes('WS');
   const isImpresora = cat.includes('IMPRESORA') || cat.includes('PLOTTER');
   const isEscaner = cat.includes('SCANNER') || cat.includes('ESCANER');
   const isTablet = cat.includes('TABLET');
+  const isMonitor = cat.includes('MONITOR');
 
-  // Helper functions
-  function setFont(style, size) { doc.setFont('helvetica', style); doc.setFontSize(size); }
-  function drawCell(x, y, w, h, text, opts = {}) {
-    doc.setDrawColor(0);
-    doc.setLineWidth(0.3);
-    if (opts.fill) { doc.setFillColor(...(opts.fillColor || [240,244,248])); doc.rect(x, y, w, h, 'FD'); }
-    else { doc.rect(x, y, w, h); }
-    setFont(opts.bold ? 'bold' : 'normal', opts.size || 7);
-    doc.setTextColor(opts.color ? opts.color[0] : 0, opts.color ? opts.color[1] : 0, opts.color ? opts.color[2] : 0);
-    const tx = opts.align === 'center' ? x + w/2 : x + 1.5;
-    const ty = y + h/2 + (opts.size || 7) * 0.12;
-    doc.text(String(text || ''), tx, ty, { align: opts.align || 'left', maxWidth: w - 3 });
-  }
-  function drawHeader(x, y, w, h, text) { drawCell(x, y, w, h, text, { fill: true, fillColor: [0,87,168], bold: true, size: 7, color: [255,255,255] }); }
-  function drawLabel(x, y, w, h, text) { drawCell(x, y, w, h, text, { fill: true, fillColor: [240,244,248], bold: true, size: 6.5 }); }
-  function drawValue(x, y, w, h, text) { drawCell(x, y, w, h, text, { size: 7 }); }
-  function drawCheck(x, y, checked) {
-    doc.setDrawColor(0); doc.setLineWidth(0.3);
-    doc.rect(x, y, 3.5, 3.5);
-    if (checked) { setFont('bold', 8); doc.text('✓', x + 0.7, y + 3); }
+  // Color palette from the model
+  const C = {
+    blue1: [0, 119, 182],      // header bars
+    blue2: [0, 95, 138],       // section number circles & text
+    blueLine: [0, 180, 216],   // thin accent line
+    labelGray: [90, 108, 125], // label text
+    valueText: [30, 41, 59],   // value text
+    orange: [154, 52, 18],     // timing text
+    bgLight: [245, 248, 250],  // light bg for rows
+    bgSection: [232, 244, 253],// section header bg
+    white: [255, 255, 255],
+    checkGreen: [16, 137, 62]
+  };
+
+  function setC(c) { doc.setTextColor(c[0], c[1], c[2]); }
+  function setF(c) { doc.setFillColor(c[0], c[1], c[2]); }
+  function font(style, size) { doc.setFont('helvetica', style); doc.setFontSize(size); }
+  function roundRect(x, y, w, h, r, color) {
+    setF(color);
+    doc.roundedRect(x, y, w, h, r, r, 'F');
   }
 
-  // ===== HEADER =====
-  // Blue header bar
-  doc.setFillColor(0, 87, 168);
-  doc.rect(ML, y, CW, 12, 'F');
-  setFont('bold', 13); doc.setTextColor(255,255,255);
-  doc.text('REPORTE DE MANTENIMIENTO PREVENTIVO — RMP', W/2, y + 5.5, { align: 'center' });
-  setFont('normal', 7);
+  // ===== TOP BAR =====
+  setF(C.blue1); doc.rect(0, 0, W, 2, 'F');
+  // Accent line
+  setF(C.blueLine); doc.rect(ML, 5.5, CW, 0.6, 'F');
+
+  // ===== TITLE =====
+  y = 10;
+  font('bold', 13); setC(C.blue2);
+  doc.text('REPORTE DE MANTENIMIENTO PREVENTIVO \u2014 RMP', W/2, y, { align: 'center' });
+
+  // ===== SUBTITLE =====
+  y += 7;
+  font('normal', 6.5); setC(C.labelGray);
+  const rmpCode = gv('CÓDIGO INVENTARIO') || last.code;
+  doc.text('SEDAPAL ETIC  |  RMP-' + rmpCode + '  |  ' + new Date(last.timestamp).toLocaleDateString('es-PE') + '  |  T\u00e9cnico: ' + (last.technician || ''), W/2, y, { align: 'center' });
+
+  // ===== TIMING =====
+  y += 5;
+  font('normal', 6); setC(C.orange);
   const startDt = last.startTime ? new Date(last.startTime) : new Date(last.timestamp);
   const endDt = new Date(last.timestamp);
   const durMin = Math.round((endDt - startDt) / 60000);
   const durStr = durMin >= 60 ? Math.floor(durMin/60) + 'h ' + (durMin%60) + 'min' : durMin + 'min';
-  doc.text('SEDAPAL ETIC | RMP-' + (gv('CÓDIGO INVENTARIO') || last.code) + ' | ' + endDt.toLocaleDateString('es-PE') + ' | Técnico: ' + (last.technician || ''), W/2, y + 9.5, { align: 'center' });
-  setFont('normal', 5.5);
-  doc.text('Inicio: ' + startDt.toLocaleString('es-PE') + ' | Fin: ' + endDt.toLocaleString('es-PE') + ' | Duración: ' + durStr, W/2, y + 12, { align: 'center' });
-  
-  y += 15;
-  doc.setTextColor(0, 0, 0);
+  doc.text('Inicio: ' + startDt.toLocaleString('es-PE') + '   |   Fin: ' + endDt.toLocaleString('es-PE') + '   |   Duraci\u00f3n total: ' + durStr, W/2, y, { align: 'center' });
 
-  // ===== 1. INFORMACIÓN DEL USUARIO Y ÁREA =====
-  drawHeader(ML, y, CW, 5, '1. Información del usuario y área');
-  y += 5;
-  const rr = 5.5;
-  const hw = CW / 2;
-  
-  drawLabel(ML, y, 20, rr, 'Usuario:'); drawValue(ML + 20, y, hw - 20, rr, gv('USUARIO ASIGNADO'));
-  drawLabel(ML + hw, y, 15, rr, 'Ficha:'); drawValue(ML + hw + 15, y, hw - 15, rr, gv('FICHA USUARIO'));
-  y += rr;
-  drawLabel(ML, y, 20, rr, 'Cargo:'); drawValue(ML + 20, y, hw - 20, rr, gv('CARGO'));
-  drawLabel(ML + hw, y, 30, rr, 'Tipo Asignación:'); drawValue(ML + hw + 30, y, hw - 30, rr, gv('TIPO ASIGNACIÓN'));
-  y += rr;
-  drawLabel(ML, y, 20, rr, 'Gerencia:'); drawValue(ML + 20, y, hw - 20, rr, gv('GERENCIA'));
-  drawLabel(ML + hw, y, 22, rr, 'Sede o Local:'); drawValue(ML + hw + 22, y, hw - 22, rr, gv('SEDE'));
-  y += rr;
-  drawLabel(ML, y, 22, rr, 'Referencia:'); drawValue(ML + 22, y, hw - 22, rr, gv('REFERENCIA UBICACIÓN'));
-  drawLabel(ML + hw, y, 28, rr, 'Equipo Func.:'); drawValue(ML + hw + 28, y, hw - 28, rr, gv('EQUIPO FUNCIONAL'));
-  y += rr;
-  drawLabel(ML, y, 28, rr, 'Grupo funcional:'); drawValue(ML + 28, y, CW - 28, rr, gv('GRUPO FUNCIONAL'));
-  y += rr + 2;
+  // ===== SECTION HELPER =====
+  function sectionHeader(num, title) {
+    y += 5;
+    // Circle with number
+    roundRect(ML, y - 3, 7, 7, 1.5, C.blue1);
+    font('bold', 7); setC(C.white);
+    doc.text(String(num), ML + 3.5, y + 1.2, { align: 'center' });
+    // Title
+    font('bold', 7.5); setC(C.blue2);
+    doc.text(title, ML + 10, y + 1);
+    y += 6;
+  }
 
-  // ===== 2. INVENTARIO DEL EQUIPO =====
-  drawHeader(ML, y, CW, 5, '2. Inventario del equipo asignado al usuario');
-  y += 5;
-  
-  // Equipment main row
-  const cols5 = CW / 5;
-  drawLabel(ML, y, cols5, rr, 'C. de Inventario'); drawLabel(ML + cols5, y, cols5, rr, 'Condición'); drawLabel(ML + cols5*2, y, cols5, rr, 'Estado');
-  drawLabel(ML + cols5*3, y, cols5, rr, 'En uso'); drawLabel(ML + cols5*4, y, cols5, rr, 'Sin uso');
-  y += rr;
-  drawValue(ML, y, cols5, rr, gv('CÓDIGO INVENTARIO'));
-  drawValue(ML + cols5, y, cols5, rr, ''); // condición
-  drawValue(ML + cols5*2, y, cols5, rr, ''); // estado
-  drawCheck(ML + cols5*3 + 10, y + 1, true); // En uso
-  drawCheck(ML + cols5*4 + 10, y + 1, false); // Sin uso
-  y += rr;
+  function fieldRow(label1, val1, label2, val2, bg) {
+    if (bg) { roundRect(ML, y - 1, CW, 8, 1, C.bgLight); }
+    font('normal', 5); setC(C.labelGray);
+    doc.text(label1, ML + 4, y + 3);
+    font('normal', 6.5); setC(C.valueText);
+    doc.text(String(val1 || ''), ML + 4, y + 6.5);
+    if (label2) {
+      font('normal', 5); setC(C.labelGray);
+      doc.text(label2, ML + CW/2 + 4, y + 3);
+      font('normal', 6.5); setC(C.valueText);
+      doc.text(String(val2 || ''), ML + CW/2 + 4, y + 6.5);
+    }
+    y += 8.5;
+  }
 
-  const cols4e = CW / 5;
-  drawLabel(ML, y, cols4e, rr, 'Categoría'); drawLabel(ML + cols4e, y, cols4e, rr, 'Tipo de Equipo');
-  drawLabel(ML + cols4e*2, y, cols4e, rr, 'Marca'); drawLabel(ML + cols4e*3, y, cols4e, rr, 'Modelo'); drawLabel(ML + cols4e*4, y, cols4e, rr, 'Serie');
-  y += rr;
-  drawValue(ML, y, cols4e, rr, gv('CATEGORÍA')); drawValue(ML + cols4e, y, cols4e, rr, gv('TIPO DE EQUIPO'));
-  drawValue(ML + cols4e*2, y, cols4e, rr, gv('MARCA')); drawValue(ML + cols4e*3, y, cols4e, rr, gv('MODELO')); drawValue(ML + cols4e*4, y, cols4e, rr, gv('SERIE EQUIPO'));
-  y += rr + 1;
+  // ===== 1. INFORMACIÓN DEL USUARIO =====
+  sectionHeader('1', 'Informaci\u00f3n del usuario y \u00e1rea');
+  fieldRow('USUARIO', gv('USUARIO ASIGNADO'), 'FICHA', gv('FICHA USUARIO'), true);
+  fieldRow('CARGO', gv('CARGO'), 'TIPO DE ASIGNACI\u00d3N', gv('TIPO ASIGNACIÓN'), false);
+  fieldRow('USUARIO OTRO', '', 'GERENCIA', gv('GERENCIA'), true);
+  fieldRow('SEDE O LOCAL', gv('SEDE'), 'EQUIPO FUNCIONAL', gv('EQUIPO FUNCIONAL'), false);
+  fieldRow('REFERENCIA', gv('REFERENCIA UBICACIÓN'), 'GRUPO FUNCIONAL', gv('GRUPO FUNCIONAL'), true);
+
+  // ===== 2. INVENTARIO =====
+  sectionHeader('2', 'Inventario del equipo asignado al usuario');
+  // Main equipment row
+  roundRect(ML, y - 1, CW, 8, 1, C.bgLight);
+  const ew = CW / 4;
+  [['C. INVENTARIO', gv('CÓDIGO INVENTARIO')], ['CONDICI\u00d3N', ''], ['ESTADO', ''], ['EN USO / SIN USO', 'En uso']].forEach((pair, i) => {
+    font('normal', 5); setC(C.labelGray);
+    doc.text(pair[0], ML + 4 + ew * i, y + 3);
+    font('normal', 6.5); setC(C.valueText);
+    doc.text(pair[1], ML + 4 + ew * i, y + 6.5);
+  });
+  y += 9;
+
+  roundRect(ML, y - 1, CW, 8, 1, C.white);
+  const cw5 = CW / 5;
+  [['CATEGOR\u00cdA', gv('CATEGORÍA')], ['TIPO', gv('TIPO DE EQUIPO')], ['MARCA', gv('MARCA')], ['MODELO', gv('MODELO')], ['SERIE', gv('SERIE EQUIPO')]].forEach((pair, i) => {
+    font('normal', 5); setC(C.labelGray);
+    doc.text(pair[0], ML + 3 + cw5 * i, y + 3);
+    font('normal', 6), setC(C.valueText);
+    doc.text(String(pair[1]).substring(0, 20), ML + 3 + cw5 * i, y + 6.5);
+  });
+  y += 10;
 
   // Peripherals
-  const pcols = [25, 30, 30, 35, CW - 120];
-  drawLabel(ML, y, pcols[0], rr, 'Periféricos:'); drawLabel(ML + pcols[0], y, pcols[1], rr, 'Marca'); drawLabel(ML + pcols[0] + pcols[1], y, pcols[2], rr, 'Modelo'); drawLabel(ML + pcols[0] + pcols[1] + pcols[2], y, pcols[3], rr, 'Serie'); drawLabel(ML + pcols[0] + pcols[1] + pcols[2] + pcols[3], y, pcols[4], rr, 'Tipo/Tamaño');
-  y += rr;
-  // Monitor
-  drawLabel(ML, y, pcols[0], rr, 'Monitor');
-  drawValue(ML + pcols[0], y, pcols[1], rr, gv('MARCA MONITOR 1'));
-  drawValue(ML + pcols[0] + pcols[1], y, pcols[2], rr, gv('MODELO MONITOR 1'));
-  drawValue(ML + pcols[0] + pcols[1] + pcols[2], y, pcols[3], rr, gv('SERIE MONITOR 1'));
-  drawValue(ML + pcols[0] + pcols[1] + pcols[2] + pcols[3], y, pcols[4], rr, gv('PULGADAS MONITOR 1'));
-  y += rr;
-  // Teclado
-  drawLabel(ML, y, pcols[0], rr, 'Teclado');
-  drawValue(ML + pcols[0], y, pcols[1], rr, gv('MARCA TECLADO'));
-  drawValue(ML + pcols[0] + pcols[1], y, pcols[2], rr, gv('TIPO TECLADO'));
-  drawValue(ML + pcols[0] + pcols[1] + pcols[2], y, pcols[3], rr, gv('SERIE TECLADO'));
-  drawValue(ML + pcols[0] + pcols[1] + pcols[2] + pcols[3], y, pcols[4], rr, '');
-  y += rr;
-  // Mouse
-  drawLabel(ML, y, pcols[0], rr, 'Mouse');
-  drawValue(ML + pcols[0], y, pcols[1], rr, gv('MARCA MOUSE'));
-  drawValue(ML + pcols[0] + pcols[1], y, pcols[2], rr, gv('TIPO MOUSE'));
-  drawValue(ML + pcols[0] + pcols[1] + pcols[2], y, pcols[3], rr, gv('SERIE MOUSE'));
-  drawValue(ML + pcols[0] + pcols[1] + pcols[2] + pcols[3], y, pcols[4], rr, '');
-  y += rr + 2;
-
-  // ===== 3. DATOS ADICIONALES =====
-  drawHeader(ML, y, CW, 5, '3. Datos adicionales del Equipo');
-  y += 5;
-  const dcols = CW / 7;
-  ['Und. Óptica', 'Procesador', 'Memoria RAM', 'Disco Duro', 'Dirección IP', 'Hostname', 'Sistema Operativo'].forEach((lbl, i) => {
-    drawLabel(ML + dcols * i, y, dcols, rr, lbl);
-  });
-  y += rr;
-  ['', gv('PROCESADOR'), gv('MEMORIA RAM'), gv('ALMACENAMIENTO'), gv('DIRECCIÓN IP'), gv('NOMBRE HOST'), ''].forEach((val, i) => {
-    drawValue(ML + dcols * i, y, dcols, rr, val);
-  });
-  y += rr + 2;
-
-  // ===== 4. ACTIVIDADES DE MANTENIMIENTO =====
-  drawHeader(ML, y, CW, 5, '4. Actividades de Mantenimiento realizados (Check list)');
-  y += 5;
-
-  const chkH = 5;
-  
-  // Always show all categories in columns like the new RMP format
-  const colW5 = CW / 5;
-  const categories = [
-    { title: 'PC / WS / LAPTOP', items: ['Diagnóstico previo estado equipo', 'Validación Software NO AUTORIZADO', 'Limpieza componentes Externos', 'Validación Antivirus WithSecure', 'Validación Agente Discovery', 'Prueba de Operatividad'] },
-    { title: 'MONITOR', items: ['Diagnóstico previo estado equipo', 'Limpieza externa del equipo', 'Pruebas de Operatividad', '', '', ''] },
-    { title: 'IMPRESORA / PLOTTER', items: ['Diagnóstico previo estado equipo', 'Identif. estado consumibles', 'Limpieza componentes internos', 'Lubricación partes mecánicas', 'Limpieza externa de equipo', 'Pruebas de Operatividad'] },
-    { title: 'SCANNER', items: ['Diagnóstico previo estado equipo', 'Limpieza interna partes mecán.', 'Limpieza externa de equipo', 'Pruebas de Operatividad', '', ''] },
-    { title: 'TABLET', items: ['Diagnóstico previo estado equipo', 'Limpieza de case externo', 'Pruebas de Operatividad', '', '', ''] }
-  ];
-  
-  // Headers
-  categories.forEach((cat, i) => { drawHeader(ML + colW5 * i, y, colW5, 4.5, cat.title); });
-  y += 4.5;
-  
-  // Items rows
-  for (let r = 0; r < 6; r++) {
-    categories.forEach((cat, i) => {
-      const x = ML + colW5 * i;
-      const item = cat.items[r] || '';
-      drawCell(x, y, colW5 - 4, chkH, item, { size: 4.5 });
-      if (item) {
-        const checked = (i === 0 && isPC) || (i === 1) || (i === 2 && isImpresora) || (i === 3 && isEscaner) || (i === 4 && isTablet);
-        drawCheck(x + colW5 - 4, y + 0.7, checked);
-      }
-    });
-    y += chkH;
-  }
+  font('bold', 6); setC(C.blue2);
+  doc.text('Perif\u00e9ricos', ML + 3, y);
   y += 2;
 
-  // ===== 5. OBSERVACIONES =====
-  drawHeader(ML, y, CW, 5, '5. Observaciones de M. Preventivo');
-  y += 5;
-  const obsText = last.changes.length > 0 
-    ? last.changes.map(c => c.field + ': ' + c.original + ' -> ' + c.updated).join(' | ')
-    : (last.observations || 'Sin observaciones');
-  drawCell(ML, y, CW, 12, obsText, { size: 6.5 });
-  y += 14;
-
-  // ===== 6. ENCUESTA DE CALIDAD =====
-  drawHeader(ML, y, CW, 5, '6. Encuesta de Calidad de servicio');
-  y += 5;
-  setFont('normal', 6); doc.setTextColor(100,100,100);
-  doc.text('1=Muy Malo | 2=Malo | 3=Regular | 4=Bueno | 5=Muy Bueno', ML + 2, y + 3.5);
-  y += 5;
-  const surveyData = last.survey || { trato: 0, conformidad: 0 };
-  const escalaW = CW - 85;
-  ['Presentación y Trato del Personal Técnico', 'Conformidad del Usuario con el mantenimiento'].forEach((item, idx) => {
-    const val = idx === 0 ? surveyData.trato : surveyData.conformidad;
-    drawCell(ML, y, 85, rr, item + ':', { size: 6 });
-    [1,2,3,4,5].forEach((n, i) => {
-      const cx = ML + 85 + i * (escalaW/5);
-      const cw = escalaW / 5;
-      if (n === val) {
-        drawCell(cx, y, cw, rr, String(n), { fill: true, fillColor: [0,87,168], align: 'center', size: 7, bold: true, color: [255,255,255] });
-      } else {
-        drawCell(cx, y, cw, rr, String(n), { align: 'center', size: 7 });
-      }
+  function periRow(name, fields, bg) {
+    if (bg) roundRect(ML, y, CW, 7, 1, C.bgLight);
+    font('bold', 6.5); setC(C.blue2);
+    doc.text(name, ML + 3, y + 5);
+    const pw = (CW - 30) / fields.length;
+    fields.forEach((f, i) => {
+      font('normal', 5); setC(C.labelGray);
+      doc.text(f[0], ML + 30 + pw * i, y + 2.5);
+      font('normal', 6); setC(C.valueText);
+      doc.text(String(f[1]).substring(0, 22), ML + 30 + pw * i, y + 5.5);
     });
-    y += rr;
-  });
-  y += 3;
+    y += 7.5;
+  }
+  periRow('Monitor', [['MARCA', gv('MARCA MONITOR 1')], ['MODELO', gv('MODELO MONITOR 1')], ['SERIE', gv('SERIE MONITOR 1')], ['TAMA\u00d1O', gv('PULGADAS MONITOR 1')]], true);
+  periRow('Teclado', [['MARCA', gv('MARCA TECLADO')], ['SERIE', gv('SERIE TECLADO')]], false);
+  periRow('Mouse', [['MARCA', gv('MARCA MOUSE')], ['SERIE', gv('SERIE MOUSE')]], true);
 
-  // ===== 7 & 8. FIRMAS =====
-  if (y > H - 35) { doc.addPage(); y = 15; }
+  // ===== 3. DATOS ADICIONALES =====
+  sectionHeader('3', 'Datos adicionales del Equipo');
+  roundRect(ML, y - 1, CW, 8, 1, C.bgLight);
+  const dw = CW / 4;
+  [['UND. \u00d3PTICA', ''], ['PROCESADOR', gv('PROCESADOR')], ['MEMORIA RAM', gv('MEMORIA RAM')], ['DISCO DURO', gv('ALMACENAMIENTO')]].forEach((p, i) => {
+    font('normal', 5); setC(C.labelGray); doc.text(p[0], ML + 3 + dw * i, y + 3);
+    font('normal', 6); setC(C.valueText); doc.text(String(p[1]).substring(0, 18), ML + 3 + dw * i, y + 6.5);
+  });
+  y += 9;
+  const dw3 = CW / 3;
+  [['DIRECCI\u00d3N IP', gv('DIRECCIÓN IP')], ['HOSTNAME', gv('NOMBRE HOST')], ['SISTEMA OPERATIVO', '']].forEach((p, i) => {
+    font('normal', 5); setC(C.labelGray); doc.text(p[0], ML + 3 + dw3 * i, y + 3);
+    font('normal', 6); setC(C.valueText); doc.text(String(p[1]).substring(0, 22), ML + 3 + dw3 * i, y + 6.5);
+  });
+  y += 9;
+
+  // ===== 4. CHECKLIST =====
+  sectionHeader('4', 'Actividades de Mantenimiento realizados (Check list)');
   
-  const fW = CW / 2 - 2;
-  drawHeader(ML, y, fW, 5, '7. Técnico de Mant. Preventivo');
-  drawHeader(ML + fW + 4, y, fW, 5, '8. Conformidad de Usuario');
+  const categories = [
+    { title: 'PC / WS / LAPTOP', items: ['Diagn\u00f3stico previo estado equipo', 'Validaci\u00f3n Software NO AUTORIZADO', 'Limpieza componentes Externos', 'Validaci\u00f3n Antivirus WithSecure', 'Validaci\u00f3n Agente Discovery', 'Prueba de Operatividad'] },
+    { title: 'MONITOR', items: ['Diagn\u00f3stico previo estado equipo', 'Limpieza externa del equipo', 'Pruebas de Operatividad'] },
+    { title: 'IMPRESORA / PLOTTER', items: ['Diagn\u00f3stico previo estado equipo', 'Identif. estado consumibles', 'Limpieza componentes internos', 'Lubricaci\u00f3n partes mec\u00e1nicas', 'Limpieza externa de equipo', 'Pruebas de Operatividad'] },
+    { title: 'SCANNER', items: ['Diagn\u00f3stico previo estado equipo', 'Limpieza interna partes mec\u00e1n.', 'Limpieza externa de equipo', 'Pruebas de Operatividad'] }
+  ];
+
+  // Draw 4 columns side by side
+  const chkColW = CW / 4;
+  categories.forEach((cat, ci) => {
+    const cx = ML + chkColW * ci;
+    const isActive = (ci === 0 && isPC) || (ci === 1 && (isPC || isMonitor)) || (ci === 2 && isImpresora) || (ci === 3 && isEscaner);
+    // Column header
+    font('bold', 5.5); setC(C.blue2);
+    doc.text(cat.title, cx + 3, y + 2);
+    let iy = y + 5;
+    cat.items.forEach(item => {
+      font('normal', 5.3); setC(C.valueText);
+      doc.text(item, cx + 7, iy);
+      // Checkbox
+      doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.2);
+      doc.roundedRect(cx + 3, iy - 2.8, 3, 3, 0.5, 0.5);
+      if (isActive) {
+        setF(C.checkGreen); doc.roundedRect(cx + 3.3, iy - 2.5, 2.4, 2.4, 0.4, 0.4, 'F');
+        font('bold', 5); setC(C.white); doc.text('\u2713', cx + 3.5, iy);
+      }
+      iy += 4.3;
+    });
+  });
+  y += 5 + 6 * 4.3;
+
+  // TABLET column (right side, below scanner)
+  const tx = ML + chkColW * 3;
+  font('bold', 5.5); setC(C.blue2);
+  doc.text('TABLET', tx + 3, y + 2);
+  let ty = y + 5;
+  ['Diagn\u00f3stico previo estado equipo', 'Limpieza de case externo', 'Pruebas de Operatividad'].forEach(item => {
+    font('normal', 5.3); setC(C.valueText);
+    doc.text(item, tx + 7, ty);
+    doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.2);
+    doc.roundedRect(tx + 3, ty - 2.8, 3, 3, 0.5, 0.5);
+    if (isTablet) {
+      setF(C.checkGreen); doc.roundedRect(tx + 3.3, ty - 2.5, 2.4, 2.4, 0.4, 0.4, 'F');
+      font('bold', 5); setC(C.white); doc.text('\u2713', tx + 3.5, ty);
+    }
+    ty += 4.3;
+  });
+  y = Math.max(y + 3 * 4.3 + 3, ty + 2);
+
+  // ===== 5. OBSERVACIONES =====
+  sectionHeader('5', 'Observaciones de M. Preventivo');
+  roundRect(ML, y - 1, CW, 14, 1.5, C.bgLight);
+  const obsText = last.changes.length > 0 
+    ? last.changes.map(c => c.field + ': ' + c.original + ' \u2192 ' + c.updated).join(' | ')
+    : (last.observations || '');
+  font('normal', 6); setC(C.valueText);
+  const obsLines = doc.splitTextToSize(obsText, CW - 8);
+  doc.text(obsLines.slice(0, 3), ML + 4, y + 4);
+  y += 16;
+
+  // Separator line
+  doc.setDrawColor(232, 237, 242); doc.setLineWidth(0.2);
+  doc.line(ML + 3, y, ML + CW - 3, y);
+  y += 2;
+
+  // ===== 6. ENCUESTA =====
+  sectionHeader('6', 'Encuesta de Calidad de servicio');
+  font('normal', 5.5); setC(C.orange);
+  doc.text('1=Muy Malo  |  2=Malo  |  3=Regular  |  4=Bueno  |  5=Muy Bueno', W/2, y, { align: 'center' });
   y += 5;
+
+  const surveyData = last.survey || { trato: 0, conformidad: 0 };
+  function surveyRow(label, val) {
+    font('normal', 6.5); setC(C.valueText);
+    doc.text(label + ':', ML + 3, y + 3);
+    const bx = ML + CW - 55;
+    for (let n = 1; n <= 5; n++) {
+      const cx = bx + (n - 1) * 10;
+      if (n === val) {
+        roundRect(cx, y - 0.5, 8, 7, 3.5, C.blue1);
+        font('bold', 6); setC(C.white);
+      } else {
+        doc.setDrawColor(180, 190, 200); doc.setLineWidth(0.3);
+        doc.roundedRect(cx, y - 0.5, 8, 7, 3.5, 3.5);
+        font('normal', 6); setC(C.blue2);
+      }
+      doc.text(String(n), cx + 4, y + 4, { align: 'center' });
+    }
+    y += 9;
+  }
+  surveyRow('Presentaci\u00f3n y Trato del Personal T\u00e9cnico', surveyData.trato);
+  // Separator
+  doc.setDrawColor(232, 237, 242); doc.setLineWidth(0.2);
+  doc.line(ML + 3, y - 3, ML + CW - 3, y - 3);
+  surveyRow('Conformidad del Usuario con el mantenimiento', surveyData.conformidad);
+
+  // ===== 7 & 8 FIRMAS =====
+  y += 2;
+  if (y > H - 45) { doc.addPage(); y = 15; }
+  const fW = CW / 2 - 4;
   
   // Técnico
-  drawCell(ML, y, fW, 22, '', {});
-  setFont('normal', 6); doc.setTextColor(150,150,150); doc.text('FIRMA', ML + 3, y + 3);
+  font('bold', 6.5); setC(C.blue2);
+  doc.text('7. T\u00e9cnico de Mant. Preventivo', ML + 3, y + 2);
+  // Firma del técnico
   if (last.techSignature) {
-    try { doc.addImage(last.techSignature, 'PNG', ML + 5, y + 3, fW - 15, 12); } catch(e) {}
+    try { doc.addImage(last.techSignature, 'PNG', ML + 5, y + 5, fW - 10, 14); } catch(e) {}
   }
-  doc.setTextColor(0,0,0);
-  setFont('bold', 6); doc.text('NOMBRES:', ML + 3, y + 18);
-  setFont('normal', 7); doc.text(last.technician || '', ML + 3, y + 21);
+  font('normal', 5); setC(C.labelGray);
+  doc.text('NOMBRES:', ML + 3, y + 22);
+  font('bold', 6.5); setC(C.valueText);
+  doc.text(last.technician || '', ML + 3, y + 26);
 
   // Usuario
-  drawCell(ML + fW + 4, y, fW, 22, '', {});
-  setFont('normal', 6); doc.setTextColor(150,150,150); doc.text('FIRMA', ML + fW + 7, y + 3);
+  font('bold', 6.5); setC(C.blue2);
+  doc.text('8. Conformidad de Usuario', ML + CW/2 + 5, y + 2);
   if (last.signature) {
-    try { doc.addImage(last.signature, 'PNG', ML + fW + 10, y + 3, fW - 15, 12); } catch(e) {}
+    try { doc.addImage(last.signature, 'PNG', ML + CW/2 + 7, y + 5, fW - 10, 14); } catch(e) {}
   }
-  doc.setTextColor(0,0,0);
-  setFont('bold', 6); doc.text('NOMBRES:', ML + fW + 7, y + 18);
-  setFont('normal', 7); doc.text(last.userName || '', ML + fW + 7, y + 21);
+  font('normal', 5); setC(C.labelGray);
+  doc.text('NOMBRES:', ML + CW/2 + 5, y + 22);
+  font('bold', 6.5); setC(C.valueText);
+  doc.text(last.userName || '', ML + CW/2 + 5, y + 26);
 
-  y += 25;
-  
-  // Footer
-  setFont('italic', 5.5); doc.setTextColor(120,120,120);
-  doc.text('Proyecto MANANTIAL — Mantenimiento Preventivo SEDAPAL ETIC — Derechos Reservados', W/2, H - 6, { align: 'center' });
+  // ===== FOOTER =====
+  // Bottom blue line
+  doc.setDrawColor(C.blue1[0], C.blue1[1], C.blue1[2]); doc.setLineWidth(0.35);
+  doc.line(ML, H - 8, W - MR, H - 8);
+  // Bottom bar
+  setF(C.blue1); doc.rect(0, H - 2, W, 2, 'F');
+  // Footer text
+  font('normal', 5.5); setC(C.labelGray);
+  doc.text('Proyecto MANANTIAL \u2014 Mantenimiento Preventivo SEDAPAL ETIC \u2014 Derechos Reservados', W/2, H - 4, { align: 'center' });
 
   // ===== SAVE =====
-  doc.save('RMP_' + (gv('CÓDIGO INVENTARIO') || last.code) + '_' + new Date().toISOString().slice(0,10) + '.pdf');
-  showToast('📄 RMP descargado en PDF');
+  doc.save('RMP_' + rmpCode + '_' + new Date().toISOString().slice(0,10) + '.pdf');
+  showToast('\ud83d\udcc4 RMP descargado en PDF');
   
   } catch(pdfErr) {
     console.error('PDF Error:', pdfErr);
