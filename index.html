@@ -2709,8 +2709,17 @@ function exportRecord() {
   }
   
   const eq = last.equipment;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('p', 'mm', 'a4');
+  
+  let jsPDFClass;
+  try {
+    jsPDFClass = window.jspdf.jsPDF;
+  } catch(e) {
+    try { jsPDFClass = window.jsPDF; } catch(e2) {}
+  }
+  if (!jsPDFClass) { alert('Error: jsPDF no disponible. Recargue la página.'); return; }
+  
+  try {
+  const doc = new jsPDFClass('p', 'mm', 'a4');
   const W = 210, H = 297;
   const ML = 12, MR = 12; // margins
   const CW = W - ML - MR; // content width
@@ -2952,6 +2961,11 @@ function exportRecord() {
   // ===== SAVE =====
   doc.save('RMP_' + (gv('CÓDIGO INVENTARIO') || last.code) + '_' + new Date().toISOString().slice(0,10) + '.pdf');
   showToast('📄 RMP descargado en PDF');
+  
+  } catch(pdfErr) {
+    console.error('PDF Error:', pdfErr);
+    alert('Error generando PDF: ' + pdfErr.message);
+  }
 }
 
 // ===== UTILITIES =====
