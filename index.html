@@ -2929,7 +2929,7 @@ function exportRecord() {
   // Técnico body
   rr(ML, y+5, fwSig, 55, 1, WHITE, FIRMA_BD);
   if (last.techSignature) { try {
-    doc.addImage(last.techSignature,'PNG',ML+5,y+8,53,40);
+    doc.addImage(last.techSignature,'PNG',ML+5,y+8,58,40);
   } catch(e){} }
   fn('normal',5); sT(LBL); doc.text('NOMBRES:', ML+3, y+52);
   fn('bold',6.5); sT(VAL); doc.text(last.technician||'', ML+3, y+56);
@@ -2940,7 +2940,7 @@ function exportRecord() {
   // Usuario body
   rr(ML+fwSig+8, y+5, fwSig, 55, 1, WHITE, FIRMA_BD);
   if (last.signature) { try {
-    doc.addImage(last.signature,'PNG',ML+fwSig+13,y+8,53,40);
+    doc.addImage(last.signature,'PNG',ML+fwSig+13,y+8,58,40);
   } catch(e){} }
   fn('normal',5); sT(LBL); doc.text('NOMBRES:', ML+fwSig+11, y+52);
   fn('bold',6.5); sT(VAL); doc.text(last.userName||'', ML+fwSig+11, y+56);
