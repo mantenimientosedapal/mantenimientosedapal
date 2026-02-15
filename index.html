@@ -2352,7 +2352,10 @@ function submitMaintenance() {
   APP.history.unshift(record);
   localStorage.setItem('sedapal_maint_history_' + new Date().toISOString().slice(0, 10), JSON.stringify(APP.history));
 
-  // Send to Google Sheets if webhook configured
+  // Generate PDF first (stores base64 in APP.lastPdfBase64)
+  exportRecord();
+
+  // Send to Google Sheets if webhook configured (includes PDF base64)
   sendToGoogleSheets(record);
 
   renderHistory();
@@ -2412,6 +2415,9 @@ async function sendToGoogleSheets(record) {
   payload.HORA_FIN = new Date(record.timestamp).toLocaleString('es-PE');
   const durMin = record.startTime ? Math.round((new Date(record.timestamp) - new Date(record.startTime)) / 60000) : 0;
   payload.DURACION = durMin >= 60 ? Math.floor(durMin/60) + 'h ' + (durMin%60) + 'min' : durMin + 'min';
+
+  // PDF base64 from jsPDF (generated locally)
+  payload.PDF_BASE64 = APP.lastPdfBase64 || '';
 
   try {
     // Send as JSON string via form-encoded POST
@@ -2962,8 +2968,15 @@ function exportRecord() {
   fn('normal',5.5); sT(LBL);
   doc.text('Proyecto MANANTIAL \u2014 Mantenimiento Preventivo SEDAPAL ETIC \u2014 Derechos Reservados', W/2, H-4, {align:'center'});
 
-  doc.save('RMP_'+rmpCode+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+  const pdfFileName = 'RMP_'+rmpCode+'_'+new Date().toISOString().slice(0,10)+'.pdf';
+  doc.save(pdfFileName);
   showToast('\ud83d\udcc4 RMP descargado en PDF');
+  
+  // Store PDF base64 for sending to Drive
+  try {
+    APP.lastPdfBase64 = doc.output('datauristring');
+  } catch(e2) { APP.lastPdfBase64 = ''; }
+  
   } catch(e) { console.error('PDF Error:',e); alert('Error PDF: '+e.message); }
 }
 
