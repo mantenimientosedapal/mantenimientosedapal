@@ -1,2986 +1,517 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>SEDAPAL - Mantenimiento de Equipos TI</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script>
-
-<style>
-:root {
-  --primary: #0057A8;
-  --primary-dark: #003D75;
-  --primary-light: #E8F1FA;
-  --accent: #00B4D8;
-  --accent-glow: rgba(0, 180, 216, 0.15);
-  --success: #10B981;
-  --success-bg: #ECFDF5;
-  --warning: #F59E0B;
-  --warning-bg: #FFFBEB;
-  --danger: #EF4444;
-  --danger-bg: #FEF2F2;
-  --bg: #F0F4F8;
-  --surface: #FFFFFF;
-  --surface-hover: #F8FAFC;
-  --text: #1E293B;
-  --text-secondary: #64748B;
-  --text-muted: #94A3B8;
-  --border: #E2E8F0;
-  --border-focus: #0057A8;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
-  --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-lg: 16px;
-}
-
-* { margin:0; padding:0; box-sizing:border-box; }
-
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* ===== HEADER ===== */
-.header {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: white;
-  padding: 16px 20px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 20px rgba(0,87,168,0.3);
-}
-
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.header-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-logo svg {
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-}
-
-.header-title {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  line-height: 1.2;
-}
-
-.header-subtitle {
-  font-size: 11px;
-  opacity: 0.8;
-  font-weight: 400;
-  margin-top: 2px;
-}
-
-.header-badge {
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(10px);
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.header-info {
-  display: flex;
-  gap: 16px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255,255,255,0.15);
-  font-size: 11px;
-  opacity: 0.85;
-}
-
-.header-info span {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* ===== MAIN CONTENT ===== */
-.main {
-  padding: 16px;
-  max-width: 600px;
-  margin: 0 auto;
-  padding-bottom: 100px;
-}
-
-/* ===== SECTIONS ===== */
-.section {
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin-bottom: 16px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border);
-  animation: slideUp 0.4s ease;
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.section-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.section-icon.blue { background: var(--primary-light); color: var(--primary); }
-.section-icon.green { background: var(--success-bg); color: var(--success); }
-.section-icon.orange { background: var(--warning-bg); color: var(--warning); }
-
-.section-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.section-desc {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-top: 1px;
-}
-
-/* ===== SEARCH BAR ===== */
-.search-group {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.search-input-wrap {
-  flex: 1;
-  position: relative;
-}
-
-.search-input {
-  width: 100%;
-  padding: 12px 14px 12px 42px;
-  font-size: 15px;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 500;
-  border: 2px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text);
-  transition: all 0.2s;
-  letter-spacing: 0.5px;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(0,87,168,0.1);
-}
-
-.search-input::placeholder {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 400;
-  color: var(--text-muted);
-  letter-spacing: 0;
-}
-
-.search-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 12px 16px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.btn:active { transform: scale(0.97); }
-
-.btn-primary {
-  background: var(--primary);
-  color: white;
-  box-shadow: 0 2px 8px rgba(0,87,168,0.3);
-}
-.btn-primary:hover { background: var(--primary-dark); }
-
-.btn-scan {
-  background: var(--accent);
-  color: white;
-  box-shadow: 0 2px 8px rgba(0,180,216,0.3);
-  padding: 12px;
-}
-
-.btn-success {
-  background: var(--success);
-  color: white;
-  box-shadow: 0 2px 8px rgba(16,185,129,0.3);
-  width: 100%;
-  padding: 14px;
-  font-size: 15px;
-}
-
-.btn-outline {
-  background: transparent;
-  color: var(--primary);
-  border: 2px solid var(--border);
-}
-
-.btn-danger-outline {
-  background: transparent;
-  color: var(--danger);
-  border: 2px solid var(--danger);
-}
-
-.btn-danger-outline:hover {
-  background: var(--danger-bg);
-}
-
-.btn-block { width: 100%; }
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
-/* ===== SCAN SECTION ===== */
-.scan-options {
-  display: flex;
-  gap: 8px;
-}
-
-.scan-options .btn {
-  flex: 1;
-  font-size: 13px;
-  padding: 10px 12px;
-}
-
-#scannerContainer {
-  display: none;
-  margin-top: 12px;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  position: relative;
-  background: #000;
-}
-
-#scannerContainer video {
-  width: 100%;
-  display: block;
-  border-radius: var(--radius-sm);
-}
-
-.scanner-overlay {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.scanner-frame {
-  width: 70%;
-  height: 50px;
-  border: 2px solid var(--accent);
-  border-radius: 8px;
-  box-shadow: 0 0 0 4000px rgba(0,0,0,0.4);
-  position: relative;
-}
-
-.scanner-line {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--accent);
-  animation: scanLine 2s infinite;
-}
-
-@keyframes scanLine {
-  0%, 100% { top: 0; }
-  50% { top: 100%; }
-}
-
-.scanner-close {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(0,0,0,0.6);
-  color: white;
-  border: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  pointer-events: auto;
-}
-
-/* ===== DATA FIELDS ===== */
-.data-grid {
-  display: grid;
-  gap: 12px;
-}
-
-.field-group {
-  position: relative;
-}
-
-.field-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-bottom: 4px;
-}
-
-.field-value {
-  padding: 10px 12px;
-  background: var(--bg);
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
-  border: 1px solid var(--border);
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-  word-break: break-word;
-}
-
-.field-value.editable {
-  background: var(--surface);
-  border: 2px solid var(--accent);
-  cursor: text;
-  position: relative;
-}
-
-.field-value.editable::after {
-  content: '✏️';
-  position: absolute;
-  right: 10px;
-  font-size: 14px;
-}
-
-.field-input {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 14px;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
-  border: 2px solid var(--accent);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text);
-  transition: all 0.2s;
-}
-
-.field-input:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-/* ===== VALIDATION STATUS ===== */
-.validation-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-.validation-bar.match {
-  background: var(--success-bg);
-  color: #065F46;
-  border: 1px solid #A7F3D0;
-}
-
-.validation-bar.mismatch {
-  background: var(--warning-bg);
-  color: #92400E;
-  border: 1px solid #FCD34D;
-}
-
-.validation-bar.error {
-  background: var(--danger-bg);
-  color: #991B1B;
-  border: 1px solid #FCA5A5;
-}
-
-/* ===== SIGNATURE PAD ===== */
-.photo-slot {
-  aspect-ratio: 1;
-  border: 2px dashed #D0D5DD;
-  border-radius: 12px;
-  cursor: pointer;
-  overflow: hidden;
-  transition: all 0.2s;
-  background: #FAFBFC;
-}
-.photo-slot:active { transform: scale(0.96); }
-.photo-slot.has-photo { border: 2px solid #10B981; background: #000; }
-.photo-preview {
-  width: 100%; height: 100%;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-}
-.photo-preview img {
-  width: 100%; height: 100%;
-  object-fit: cover; border-radius: 10px;
-}
-.photo-remove {
-  position: absolute; top: 4px; right: 4px;
-  background: rgba(239,68,68,0.9); color: white;
-  border: none; border-radius: 50%; width: 22px; height: 22px;
-  font-size: 12px; cursor: pointer; z-index: 2;
-  display: flex; align-items: center; justify-content: center;
-}
-.signature-area {
-  position: relative;
-  margin-top: 8px;
-}
-
-.signature-canvas {
-  width: 100%;
-  height: 180px;
-  border: 2px dashed var(--border);
-  border-radius: var(--radius-sm);
-  background: white;
-  cursor: crosshair;
-  touch-action: none;
-}
-
-.signature-canvas.signed {
-  border-style: solid;
-  border-color: var(--success);
-}
-
-.signature-placeholder {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: var(--text-muted);
-  font-size: 13px;
-  pointer-events: none;
-  text-align: center;
-}
-
-.signature-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.signature-actions .btn { flex: 1; font-size: 13px; }
-
-/* ===== CONFORMITY FIELDS ===== */
-.conformity-fields {
-  display: grid;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.conformity-input {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 14px;
-  font-family: 'DM Sans', sans-serif;
-  border: 2px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text);
-  transition: all 0.2s;
-}
-
-.conformity-input:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(0,87,168,0.1);
-}
-
-.conformity-select {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 14px;
-  font-family: 'DM Sans', sans-serif;
-  border: 2px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text);
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-}
-
-/* ===== CHANGES LOG ===== */
-.changes-log {
-  background: var(--warning-bg);
-  border: 1px solid #FCD34D;
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  margin-top: 12px;
-}
-
-.changes-log h4 {
-  font-size: 12px;
-  font-weight: 700;
-  color: #92400E;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-}
-
-.change-item {
-  font-size: 12px;
-  color: #78350F;
-  padding: 4px 0;
-  border-bottom: 1px solid rgba(252,211,77,0.3);
-  display: flex;
-  gap: 6px;
-}
-
-.change-item:last-child { border-bottom: none; }
-
-/* ===== MODAL ===== */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.modal-overlay.active { display: flex; }
-
-.modal {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  width: 100%;
-  max-width: 400px;
-  box-shadow: var(--shadow-lg);
-  animation: modalIn 0.3s ease;
-}
-
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.modal-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 16px;
-}
-
-.modal-icon.success { background: var(--success-bg); color: var(--success); }
-.modal-icon.error { background: var(--danger-bg); color: var(--danger); }
-
-.modal h3 {
-  text-align: center;
-  font-size: 18px;
-  margin-bottom: 8px;
-}
-
-.modal p {
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-.modal .btn { margin-top: 8px; }
-
-/* ===== TOAST ===== */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: var(--text);
-  color: white;
-  padding: 12px 20px;
-  border-radius: var(--radius);
-  font-size: 13px;
-  font-weight: 500;
-  box-shadow: var(--shadow-lg);
-  z-index: 2000;
-  transition: transform 0.3s ease;
-  white-space: nowrap;
-}
-
-.toast.show { transform: translateX(-50%) translateY(0); }
-
-/* ===== CONFIG PANEL ===== */
-.config-panel {
-  display: none;
-}
-
-.config-panel.active { display: block; }
-
-.config-input-group {
-  margin-bottom: 16px;
-}
-
-.config-input-group label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.config-input {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 13px;
-  font-family: 'JetBrains Mono', monospace;
-  border: 2px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text);
-}
-
-.config-input:focus {
-  outline: none;
-  border-color: var(--primary);
-}
-
-.config-help {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 4px;
-  line-height: 1.5;
-}
-
-.config-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-weight: 500;
-  margin-bottom: 16px;
-}
-
-.config-status.connected {
-  background: var(--success-bg);
-  color: #065F46;
-}
-
-.config-status.disconnected {
-  background: var(--danger-bg);
-  color: #991B1B;
-}
-
-/* ===== EMPTY STATE ===== */
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-}
-
-.empty-state svg {
-  color: var(--text-muted);
-  margin-bottom: 16px;
-}
-
-.empty-state h3 {
-  font-size: 16px;
-  color: var(--text);
-  margin-bottom: 6px;
-}
-
-.empty-state p {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-/* ===== LOADER ===== */
-.loader {
-  display: none;
-  text-align: center;
-  padding: 30px;
-}
-
-.loader.active { display: block; }
-
-.spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--border);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto 12px;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.loader-text {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-/* ===== TECH NAME FIELD ===== */
-.tech-name-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: var(--primary-light);
-  border-radius: var(--radius-sm);
-  margin-bottom: 12px;
-  font-size: 13px;
-}
-
-.tech-name-bar input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--primary-dark);
-  outline: none;
-}
-
-.tech-name-bar input::placeholder {
-  color: var(--primary);
-  opacity: 0.6;
-  font-weight: 400;
-}
-
-/* ===== COUNTER ===== */
-.counter-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--primary-light);
-  color: var(--primary);
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  margin-left: auto;
-}
-
-/* ===== HISTORY ===== */
-.history-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px;
-  border-bottom: 1px solid var(--border);
-  font-size: 13px;
-}
-
-.history-item:last-child { border-bottom: none; }
-
-.history-item .code {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 600;
-  color: var(--primary);
-  font-size: 13px;
-}
-
-.history-item .time {
-  color: var(--text-muted);
-  font-size: 11px;
-  margin-left: auto;
-  white-space: nowrap;
-}
-
-.history-item .status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.status-dot.ok { background: var(--success); }
-.status-dot.mod { background: var(--warning); }
-
-/* ===== TABS ===== */
-.tabs {
-  display: flex;
-  gap: 4px;
-  background: var(--bg);
-  padding: 4px;
-  border-radius: var(--radius-sm);
-  margin-bottom: 16px;
-}
-
-.tab {
-  flex: 1;
-  padding: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  text-align: center;
-  border: none;
-  background: transparent;
-  border-radius: 6px;
-  cursor: pointer;
-  color: var(--text-secondary);
-  font-family: 'DM Sans', sans-serif;
-  transition: all 0.2s;
-}
-
-.tab.active {
-  background: var(--surface);
-  color: var(--primary);
-  box-shadow: var(--shadow-sm);
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 360px) {
-  .header-title { font-size: 13px; }
-  .main { padding: 12px; }
-  .section { padding: 16px; }
-}
-</style>
-</head>
-<body>
-
-<!-- HEADER -->
-<header class="header">
-  <div class="header-top">
-    <div class="header-logo">
-      <svg viewBox="0 0 40 40" fill="none">
-        <rect width="40" height="40" rx="10" fill="rgba(255,255,255,0.15)"/>
-        <path d="M12 14h16v2H12zm0 5h16v2H12zm0 5h10v2H12z" fill="white" opacity="0.9"/>
-        <circle cx="30" cy="28" r="5" fill="#00B4D8"/>
-        <path d="M28.5 28l1 1 2-2" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <div>
-        <div class="header-title">Mantenimiento de Equipos TI</div>
-        <div class="header-subtitle">GGSE - ETIC · SEDAPAL</div>
-      </div>
-    </div>
-    <div class="header-badge" id="connectionBadge">⚙️ Config</div>
-  </div>
-  <div class="header-info">
-    <span>📍 SEDE: COP La Atarjea</span>
-    <span>📅 <span id="currentDate"></span></span>
-  </div>
-</header>
-
-<!-- MAIN CONTENT -->
-<div class="main">
-
-  <!-- CONFIG PANEL -->
-  <div class="section config-panel" id="configPanel">
-    <div class="section-header">
-      <div class="section-icon blue">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-      </div>
-      <div>
-        <div class="section-title">Configuración</div>
-        <div class="section-desc">Conectar con Google Sheets</div>
-      </div>
-    </div>
-
-    <div id="configStatus" class="config-status disconnected">
-      🔴 No conectado a Google Sheets
-    </div>
-
-    <div class="config-input-group">
-      <label>ID de Google Sheet</label>
-      <input type="text" class="config-input" id="sheetId" placeholder="Ej: 1BxiM...kGh8">
-      <div class="config-help">Encuéntralo en la URL de tu Google Sheet:<br>docs.google.com/spreadsheets/d/<strong>[ID_AQUÍ]</strong>/edit</div>
-    </div>
-
-    <div class="config-input-group">
-      <label>Nombre de la hoja</label>
-      <input type="text" class="config-input" id="sheetName" placeholder="Ej: Inventario_Mantenimiento" value="Inventario_Mantenimiento">
-      <div class="config-help">Nombre exacto de la pestaña en tu spreadsheet</div>
-    </div>
-
-    <div class="config-input-group">
-      <label>API Key de Google</label>
-      <input type="text" class="config-input" id="apiKey" placeholder="AIza...">
-      <div class="config-help">
-        Necesitas una API Key de Google Cloud con acceso a Sheets API.<br>
-        <strong>Alternativa sin API Key:</strong> Publica tu Sheet como web (Archivo → Compartir → Publicar en la web → CSV) y usa el modo público.
-      </div>
-    </div>
-
-    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-      <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
-        <input type="checkbox" id="publicMode"> Usar modo público (Sheet publicado como CSV)
-      </label>
-    </div>
-
-    <div style="display: flex; gap: 8px;">
-      <button class="btn btn-primary btn-block" onclick="saveConfig()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
-        Guardar y Conectar
-      </button>
-      <button class="btn btn-outline" onclick="loadDemoData()" style="white-space:nowrap;">
-        Demo
-      </button>
-    </div>
-
-    <div class="config-help" style="margin-top: 12px; padding: 10px; background: var(--primary-light); border-radius: 8px;">
-      <strong>💡 Modo Demo:</strong> Presiona "Demo" para probar la app con datos de ejemplo sin necesidad de Google Sheets.
-    </div>
-
-    <div style="margin-top:16px;padding-top:16px;border-top:2px dashed var(--border);">
-      <div style="font-size:13px;font-weight:700;color:#10B981;margin-bottom:8px;">☁️ GUARDAR CAMBIOS EN GOOGLE SHEETS</div>
-      <div class="config-help" style="margin-bottom:10px;">
-        Al registrar un mantenimiento, se envía el registro completo a una hoja de Google Sheets. Necesitas la <strong>URL del Web App</strong> (ver guía de Apps Script).
-      </div>
-      <div class="config-input-group">
-        <label>URL del Web App (Google Apps Script)</label>
-        <input type="text" class="config-input" id="webhookUrl" placeholder="https://script.google.com/macros/s/AKfy.../exec">
-      </div>
-      <div id="webhookStatus" style="display:none;" class="validation-bar match"></div>
-    </div>
-
-    <div style="margin-top:16px;padding-top:16px;border-top:2px dashed var(--border);">
-      <div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;">📂 CARGAR ARCHIVO CSV (RECOMENDADO)</div>
-      <div class="config-help" style="margin-bottom:10px;">
-        Carga el archivo <strong>inventario_mantenimiento.csv</strong> directamente desde tu celular. Funciona sin internet después de cargarlo.
-      </div>
-      <label class="btn btn-success btn-block" style="cursor:pointer;position:relative;margin-bottom:8px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        Seleccionar archivo CSV
-        <input type="file" accept=".csv" id="csvFileInput" onchange="loadCSVFile(this)" style="position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;cursor:pointer;">
-      </label>
-      <div id="csvStatus" style="display:none;" class="validation-bar match"></div>
-      <div class="config-help">
-        <strong>¿De dónde obtengo el CSV?</strong><br>
-        1. Abre el Excel <em>SEDAPAL_Inventario_Mantenimiento_TI.xlsx</em> en tu PC<br>
-        2. Haz clic en <strong>Archivo → Guardar como → CSV UTF-8 (.csv)</strong><br>
-        3. Envía el CSV a tu celular por WhatsApp, correo o Drive<br>
-        4. Cárgalo aquí. ¡Los datos quedan guardados en el navegador!
-      </div>
-    </div>
-  </div>
-
-  <!-- SEARCH SECTION -->
-  <div class="section" id="searchSection">
-    <div class="section-header">
-      <div class="section-icon blue">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </div>
-      <div>
-        <div class="section-title">Buscar Equipo</div>
-        <div class="section-desc">Ingrese código de inventario o escanee</div>
-      </div>
-    </div>
-
-    <div class="tech-name-bar">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <input type="text" id="techName" placeholder="Nombre del técnico de mantenimiento">
-    </div>
-
-    <div class="search-group">
-      <div class="search-input-wrap">
-        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" class="search-input" id="equipCode" placeholder="Código de inventario..." autocomplete="off">
-      </div>
-      <button class="btn btn-primary" onclick="searchEquipment()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </button>
-    </div>
-
-    <div class="scan-options">
-      <button class="btn btn-scan" onclick="startBarcodeScanner()" style="flex:1;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6" y2="16"/><line x1="9" y1="8" x2="9" y2="16"/><line x1="12" y1="8" x2="14" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg>
-        Escanear Código
-      </button>
-      <button class="btn btn-scan" onclick="startSerialScanner()" style="flex:1;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 7h.01M7 12h.01M7 17h.01M12 7h.01M12 12h.01M12 17h.01M17 7h.01M17 12h.01"/></svg>
-        Escanear Serie
-      </button>
-    </div>
-
-    <div id="scannerContainer">
-      <video id="scannerVideo" autoplay playsinline></video>
-      <div class="scanner-overlay">
-        <div class="scanner-frame">
-          <div class="scanner-line"></div>
-        </div>
-      </div>
-      <button class="scanner-close" onclick="stopScanner()">✕</button>
-    </div>
-  </div>
-
-  <!-- LOADER -->
-  <div class="loader" id="loader">
-    <div class="spinner"></div>
-    <div class="loader-text">Buscando equipo en la base de datos...</div>
-  </div>
-
-  <!-- EQUIPMENT DATA (hidden initially) -->
-  <div id="equipmentSection" style="display:none;">
-
-    <!-- EQUIPMENT INFO -->
-    <div class="section" style="animation-delay: 0.1s;">
-      <div class="section-header">
-        <div class="section-icon blue">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        </div>
-        <div>
-          <div class="section-title">Datos del Equipo</div>
-          <div class="section-desc">Verificar información del equipo</div>
-        </div>
-        <span class="counter-badge" id="matchBadge">—</span>
-      </div>
-
-      <div id="validationBar" class="validation-bar match" style="display:none;"></div>
-
-      <div class="data-grid" id="dataGrid">
-        <!-- Populated dynamically -->
-      </div>
-
-      <div id="changesLog" class="changes-log" style="display:none;">
-        <h4>📝 Cambios Realizados</h4>
-        <div id="changesList"></div>
-      </div>
-    </div>
-
-    <!-- SERIAL SCAN & VERIFICATION -->
-    <div class="section" style="animation-delay: 0.2s;">
-      <div class="section-header">
-        <div class="section-icon orange">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6" y2="16"/><line x1="9" y1="8" x2="9" y2="16"/><line x1="12" y1="8" x2="14" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg>
-        </div>
-        <div>
-          <div class="section-title">Verificación de Series</div>
-          <div class="section-desc">Validar series de todos los periféricos</div>
-        </div>
-      </div>
-
-      <div id="serialChecklist" style="display:flex;flex-direction:column;gap:8px;">
-        <!-- Populated dynamically -->
-      </div>
-
-      <div style="margin-top:12px;">
-        <div class="search-group">
-          <div class="search-input-wrap">
-            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6" y2="16"/></svg>
-            <input type="text" class="search-input" id="serialInput" placeholder="Escanear o ingresar serie para verificar...">
-          </div>
-          <button class="btn btn-scan" onclick="startSerialScanVerify()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          </button>
-        </div>
-        <button class="btn btn-outline btn-block" onclick="verifySerialAuto()" style="font-size:13px;">
-          🔍 Buscar serie en periféricos del equipo
-        </button>
-      </div>
-
-      <div id="serialResult" style="margin-top: 10px;"></div>
-    </div>
-
-    <!-- PHOTOS SECTION -->
-    <div class="section" style="animation-delay: 0.25s;">
-      <div class="section-header">
-        <div class="section-icon" style="background:#ECFEFF;color:#0891B2;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-        </div>
-        <div>
-          <div class="section-title">Evidencia Fotográfica</div>
-          <div class="section-desc">Máximo 3 fotos — se comprimen automáticamente</div>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px;">
-        <div class="photo-slot" id="photoSlot1" onclick="takePhoto(1)">
-          <input type="file" accept="image/*" capture="environment" id="photoInput1" onchange="handlePhoto(1,this)" style="display:none;">
-          <div id="photoPreview1" class="photo-preview">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-            <div style="font-size:10px;color:#94A3B8;margin-top:4px;font-weight:600;">📷 EQUIPO</div>
-          </div>
-        </div>
-        <div class="photo-slot" id="photoSlot2" onclick="takePhoto(2)">
-          <input type="file" accept="image/*" capture="environment" id="photoInput2" onchange="handlePhoto(2,this)" style="display:none;">
-          <div id="photoPreview2" class="photo-preview">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-            <div style="font-size:10px;color:#94A3B8;margin-top:4px;font-weight:600;">🏷️ CÓDIGO INV.</div>
-          </div>
-        </div>
-        <div class="photo-slot" id="photoSlot3" onclick="takePhoto(3)">
-          <input type="file" accept="image/*" capture="environment" id="photoInput3" onchange="handlePhoto(3,this)" style="display:none;">
-          <div id="photoPreview3" class="photo-preview">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-            <div style="font-size:10px;color:#94A3B8;margin-top:4px;font-weight:600;">🔄 CAMBIO</div>
-          </div>
-        </div>
-      </div>
-      <div id="photoCount" style="font-size:11px;color:#64748B;text-align:center;">Toca para tomar foto con la cámara — Opcional</div>
-    </div>
-
-    <!-- SIGNATURE & CONFORMITY -->
-    <div class="section" style="animation-delay: 0.3s;">
-      <div class="section-header">
-        <div class="section-icon green">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M9 12l2 2 4-4"/></svg>
-        </div>
-        <div>
-          <div class="section-title">Conformidad del Usuario</div>
-          <div class="section-desc">Firma del usuario que recibe el equipo</div>
-        </div>
-      </div>
-
-      <div class="conformity-fields">
-        <div class="field-group" style="position:relative;">
-          <div class="field-label">Ficha del usuario</div>
-          <input type="text" class="conformity-input" id="userFicha" placeholder="Ingrese la ficha del usuario" inputmode="numeric" autocomplete="off" oninput="searchByFicha(this.value)">
-          <div id="fichaResult" style="display:none;margin-top:6px;padding:8px 12px;border-radius:8px;font-size:13px;"></div>
-        </div>
-        <div class="field-group">
-          <div class="field-label">Nombre completo del usuario <span id="nameAutoTag" style="display:none;font-size:10px;background:#ECFDF5;color:#065F46;padding:1px 6px;border-radius:4px;margin-left:4px;">AUTOCOMPLETADO</span></div>
-          <input type="text" class="conformity-input" id="userName" placeholder="Se completa automáticamente con la ficha" style="background:#F0F4F8;">
-        </div>
-        <div class="field-group">
-          <div class="field-label">Cargo <span id="cargoAutoTag" style="display:none;font-size:10px;background:#ECFDF5;color:#065F46;padding:1px 6px;border-radius:4px;margin-left:4px;">AUTOCOMPLETADO</span></div>
-          <input type="text" class="conformity-input" id="userCargo" placeholder="Se completa automáticamente con la ficha" style="background:#F0F4F8;">
-        </div>
-        <div class="field-group">
-          <div class="field-label">Estado del mantenimiento</div>
-          <select class="conformity-select" id="maintStatus">
-            <option value="">Seleccionar...</option>
-            <option value="Conforme">✅ Conforme - Equipo operativo</option>
-            <option value="Conforme con observaciones">⚠️ Conforme con observaciones</option>
-            <option value="No conforme">❌ No conforme</option>
-          </select>
-        </div>
-        <div class="field-group" id="obsGroup" style="display:none;">
-          <div class="field-label">Observaciones</div>
-          <textarea class="conformity-input" id="observations" placeholder="Detalle las observaciones..." rows="3" style="resize:vertical;"></textarea>
-        </div>
-      </div>
-
-      <!-- ENCUESTA DE CALIDAD -->
-      <div style="margin-top:16px;padding:12px;background:#F0F7FF;border-radius:12px;border:1px solid #BFDBFE;">
-        <div style="font-weight:700;font-size:14px;color:#0057A8;margin-bottom:8px;">📊 Encuesta de Calidad de Servicio</div>
-        <div style="font-size:11px;color:#64748B;margin-bottom:10px;">1=Muy Malo | 2=Malo | 3=Regular | 4=Bueno | 5=Muy Bueno</div>
-        <div style="margin-bottom:10px;">
-          <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Presentación y Trato del Personal Técnico:</div>
-          <div style="display:flex;gap:8px;" id="surveyTratoGroup">
-            <button type="button" class="survey-btn" onclick="setSurvey('trato',1)" data-val="1" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">1</button>
-            <button type="button" class="survey-btn" onclick="setSurvey('trato',2)" data-val="2" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">2</button>
-            <button type="button" class="survey-btn" onclick="setSurvey('trato',3)" data-val="3" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">3</button>
-            <button type="button" class="survey-btn" onclick="setSurvey('trato',4)" data-val="4" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">4</button>
-            <button type="button" class="survey-btn" onclick="setSurvey('trato',5)" data-val="5" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">5</button>
-          </div>
-        </div>
-        <div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Conformidad del Usuario con el mantenimiento:</div>
-          <div style="display:flex;gap:8px;" id="surveyConformidadGroup">
-            <button type="button" class="survey-btn" onclick="setSurvey('conformidad',1)" data-val="1" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">1</button>
-            <button type="button" class="survey-btn" onclick="setSurvey('conformidad',2)" data-val="2" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">2</button>
-            <button type="button" class="survey-btn" onclick="setSurvey('conformidad',3)" data-val="3" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">3</button>
-            <button type="button" class="survey-btn" onclick="setSurvey('conformidad',4)" data-val="4" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">4</button>
-            <button type="button" class="survey-btn" onclick="setSurvey('conformidad',5)" data-val="5" style="width:40px;height:40px;border-radius:50%;border:2px solid #CBD5E1;background:#FFF;font-size:16px;font-weight:700;cursor:pointer;">5</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="field-label" style="margin-top:16px;">FIRMA DEL USUARIO</div>
-      <div class="signature-area">
-        <canvas class="signature-canvas" id="signatureCanvas"></canvas>
-        <div class="signature-placeholder" id="sigPlaceholder">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-          <br>Firmar aquí (Usuario)
-        </div>
-      </div>
-      <div class="signature-actions">
-        <button class="btn btn-outline" onclick="clearSignature()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-          Limpiar
-        </button>
-        <button class="btn btn-outline" onclick="undoSignature()">
-          ↩ Deshacer
-        </button>
-      </div>
-
-      <!-- FIRMA DEL TÉCNICO -->
-      <div class="field-label" style="margin-top:16px;">FIRMA DEL TÉCNICO</div>
-      <div class="signature-area">
-        <canvas class="signature-canvas" id="techSignatureCanvas"></canvas>
-        <div class="signature-placeholder" id="techSigPlaceholder">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-          <br>Firmar aquí (Técnico)
-        </div>
-      </div>
-      <div class="signature-actions">
-        <button class="btn btn-outline" onclick="clearTechSignature()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-          Limpiar
-        </button>
-        <button class="btn btn-outline" onclick="undoTechSignature()">
-          ↩ Deshacer
-        </button>
-      </div>
-    </div>
-
-    <!-- SUBMIT -->
-    <button class="btn btn-success" onclick="submitMaintenance()" id="submitBtn">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
-      Registrar Mantenimiento
-    </button>
-
-  </div>
-
-  <!-- HISTORY -->
-  <div class="section" id="historySection">
-    <div class="section-header">
-      <div class="section-icon green">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-      </div>
-      <div>
-        <div class="section-title">Historial de Sesión</div>
-        <div class="section-desc">Equipos procesados hoy</div>
-      </div>
-      <span class="counter-badge" id="historyCount">0</span>
-    </div>
-    <div id="historyList">
-      <div class="empty-state">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        <h3>Sin registros aún</h3>
-        <p>Los equipos procesados aparecerán aquí</p>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- SUCCESS MODAL -->
-<div class="modal-overlay" id="successModal">
-  <div class="modal">
-    <div class="modal-icon success">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg>
-    </div>
-    <h3>¡Mantenimiento Registrado!</h3>
-    <p id="successMessage">El equipo ha sido registrado correctamente.</p>
-    <button class="btn btn-primary btn-block" onclick="closeModal(); resetForm();">Registrar Otro Equipo</button>
-    <button class="btn btn-outline btn-block" onclick="exportRecord()" style="margin-top:6px;">
-      📄 Descargar RMP (PDF)
-    </button>
-  </div>
-</div>
-
-<!-- ERROR MODAL -->
-<div class="modal-overlay" id="errorModal">
-  <div class="modal">
-    <div class="modal-icon error">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-    </div>
-    <h3 id="errorTitle">Error</h3>
-    <p id="errorMessage">Ha ocurrido un error.</p>
-    <button class="btn btn-primary btn-block" onclick="closeModal()">Entendido</button>
-  </div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<script>
-// ===== APP STATE =====
-const APP = {
-  config: {
-    sheetId: '',
-    sheetName: 'Hoja1',
-    apiKey: '',
-    publicMode: false,
-    connected: false
-  },
-  currentEquipment: null,
-  originalData: null,
-  changes: [],
-  history: [],
-  isDemo: false,
-  csvData: null,
-  scanMode: null, // 'code' or 'serial'
-  scanStream: null,
-  signatureStrokes: [],
-  currentStroke: [],
-  hasSigned: false
-};
-
-// ===== DEMO DATA =====
-const DEMO_DATA = [
-  { 'CÓDIGO INVENTARIO': 'COL2264', 'CATEGORÍA': 'LAPTOP', 'TIPO DE EQUIPO': 'LAPTOP TIPO 3', 'MARCA': 'LENOVO', 'MODELO': 'THINKPAD P1 GEN 5', 'SERIE EQUIPO': 'PW05T1GT', 'PROPIETARIO': 'Fonafe-Colsof', 'NOMBRE HOST': 'COL2264', 'DIRECCIÓN IP': '172.16.41.53', 'PROCESADOR': 'INTEL CORE i7', 'MEMORIA RAM': '64 GB', 'ALMACENAMIENTO': '1 TB', 'MARCA MONITOR 1': 'LENOVO', 'MODELO MONITOR 1': 'E24-29', 'SERIE MONITOR 1': 'VVM59830', 'PULGADAS MONITOR 1': 'LED-24', 'MARCA MONITOR 2': '', 'MODELO MONITOR 2': '', 'SERIE MONITOR 2': '', 'PULGADAS MONITOR 2': '', 'MARCA TECLADO': '', 'TIPO TECLADO': '', 'SERIE TECLADO': '', 'MARCA MOUSE': '', 'TIPO MOUSE': '', 'SERIE MOUSE': '', 'CONDICIÓN': 'EN PRODUCCION', 'ESTADO': 'OPERATIVO', 'SEDE': 'COP Atarjea Nueva Sede', 'ZONA DE INVENTARIO': 'COP Atarjea.Edificio CDTA.2do Piso', 'PISO': '2DO PISO', 'REFERENCIA UBICACIÓN': 'SOPORTE Y AUTOMATIZACION', 'GERENCIA': 'GERENCIA DE DESARROLLO E INVESTIGACION', 'EQUIPO FUNCIONAL': 'EQUIPO TECNOLOGIAS DE LA INFORMACION Y COMUNICACIONES', 'GRUPO FUNCIONAL': 'ETIC.GESTION DE SERVICIOS', 'FICHA USUARIO': '16132', 'USUARIO ASIGNADO': 'Silupu Sandoval, Keytin Briggit', 'CARGO': 'Técnico en Scada', 'TIPO ASIGNACIÓN': 'ESTABLE', 'TÉCNICO RESPONSABLE': 'Fernando Mesías Medina' },
-  { 'CÓDIGO INVENTARIO': 'COL1998', 'CATEGORÍA': 'PC', 'TIPO DE EQUIPO': 'PC', 'MARCA': 'LENOVO', 'MODELO': 'THINKCENTRE M70Q', 'SERIE EQUIPO': 'MJ0KJBH0', 'PROPIETARIO': 'Fonafe-Colsof', 'NOMBRE HOST': 'COL1998', 'DIRECCIÓN IP': '1.1.222.134', 'PROCESADOR': 'INTEL CORE i5', 'MEMORIA RAM': '8 GB', 'ALMACENAMIENTO': '512 GB', 'MARCA MONITOR 1': 'LENOVO', 'MODELO MONITOR 1': 'E24-29', 'SERIE MONITOR 1': 'VVM54821', 'PULGADAS MONITOR 1': 'LED-24', 'MARCA MONITOR 2': 'LENOVO', 'MODELO MONITOR 2': 'E24-29', 'SERIE MONITOR 2': 'VVM59455', 'PULGADAS MONITOR 2': 'LED-24', 'MARCA TECLADO': 'LENOVO', 'TIPO TECLADO': 'USB', 'SERIE TECLADO': '4107822', 'MARCA MOUSE': 'LENOVO', 'TIPO MOUSE': 'USB', 'SERIE MOUSE': '5519744', 'CONDICIÓN': 'EN PRODUCCION', 'ESTADO': 'OPERATIVO', 'SEDE': 'Centro de Servicio Ate', 'ZONA DE INVENTARIO': 'Centro de Servicio Ate', 'PISO': '1ER PISO', 'REFERENCIA UBICACIÓN': 'ATENCION AL CLIENTE', 'GERENCIA': 'GERENCIA DE SERVICIOS CENTRO', 'EQUIPO FUNCIONAL': 'EQUIPO COMERCIAL ATE VITARTE', 'GRUPO FUNCIONAL': 'ECAV.COMERCIAL', 'FICHA USUARIO': '15320', 'USUARIO ASIGNADO': 'Condori Uria, Ricardo Moises', 'CARGO': 'Técnico Comercial', 'TIPO ASIGNACIÓN': 'ESTABLE', 'TÉCNICO RESPONSABLE': 'Daniel Jesús Zapana Goyas' },
-  { 'CÓDIGO INVENTARIO': '1810103', 'CATEGORÍA': 'PC', 'TIPO DE EQUIPO': 'PC', 'MARCA': 'LENOVO', 'MODELO': '3209-1T2', 'SERIE EQUIPO': 'MJ8691C', 'PROPIETARIO': 'Sedapal', 'NOMBRE HOST': '1810103-S', 'DIRECCIÓN IP': '172.16.12.45', 'PROCESADOR': 'INTEL CORE i5', 'MEMORIA RAM': '8 GB', 'ALMACENAMIENTO': '500 GB', 'MARCA MONITOR 1': 'LENOVO', 'MODELO MONITOR 1': '5047-HB2', 'SERIE MONITOR 1': 'VNA3RTK', 'PULGADAS MONITOR 1': 'LCD-17', 'MARCA MONITOR 2': '', 'MODELO MONITOR 2': '', 'SERIE MONITOR 2': '', 'PULGADAS MONITOR 2': '', 'MARCA TECLADO': 'LENOVO', 'TIPO TECLADO': 'USB', 'SERIE TECLADO': '3955891', 'MARCA MOUSE': 'LENOVO', 'TIPO MOUSE': 'USB', 'SERIE MOUSE': '44V5123', 'CONDICIÓN': 'EN PRODUCCION', 'ESTADO': 'PRESTAMO', 'SEDE': 'COP Atarjea Nueva Sede', 'ZONA DE INVENTARIO': 'COP Atarjea.Edificio CDTA.3er Piso', 'PISO': '3ER PISO', 'REFERENCIA UBICACIÓN': 'OPERACIONES FINANCIERAS', 'GERENCIA': 'GERENCIA DE FINANZAS', 'EQUIPO FUNCIONAL': 'EQUIPO OPERACIONES FINANCIERAS', 'GRUPO FUNCIONAL': 'EOF.OPERACIONES', 'FICHA USUARIO': '13948', 'USUARIO ASIGNADO': 'Torres Felix, Carlos Felipe', 'CARGO': 'Jefe del Equipo Operaciones Financieras', 'TIPO ASIGNACIÓN': 'JEFE DE EQUIPO', 'TÉCNICO RESPONSABLE': 'Joel Jean Rojas Medina' },
-  { 'CÓDIGO INVENTARIO': 'COL0815', 'CATEGORÍA': 'PC', 'TIPO DE EQUIPO': 'PC', 'MARCA': 'LENOVO', 'MODELO': 'THINKCENTRE M70Q GEN 3', 'SERIE EQUIPO': 'MJ0KQ419', 'PROPIETARIO': 'Fonafe-Colsof', 'NOMBRE HOST': 'COL0815', 'DIRECCIÓN IP': '11.1.7.17', 'PROCESADOR': 'INTEL CORE i5', 'MEMORIA RAM': '8 GB', 'ALMACENAMIENTO': '512 GB', 'MARCA MONITOR 1': 'LENOVO', 'MODELO MONITOR 1': 'T24i-30', 'SERIE MONITOR 1': 'VNA8XK2', 'PULGADAS MONITOR 1': 'LED-24', 'MARCA MONITOR 2': '', 'MODELO MONITOR 2': '', 'SERIE MONITOR 2': '', 'PULGADAS MONITOR 2': '', 'MARCA TECLADO': 'LENOVO', 'TIPO TECLADO': 'USB', 'SERIE TECLADO': '4190312', 'MARCA MOUSE': 'LENOVO', 'TIPO MOUSE': 'USB', 'SERIE MOUSE': '5634102', 'CONDICIÓN': 'EN PRODUCCION', 'ESTADO': 'OPERATIVO', 'SEDE': 'COP Atarjea Nueva Sede', 'ZONA DE INVENTARIO': 'COP Atarjea.Edificio CDTA.4to Piso', 'PISO': '4TO PISO', 'REFERENCIA UBICACIÓN': 'RECURSOS HUMANOS', 'GERENCIA': 'GERENCIA DE RECURSOS HUMANOS', 'EQUIPO FUNCIONAL': 'EQUIPO GESTION DEL TALENTO', 'GRUPO FUNCIONAL': 'EGT.TALENTO', 'FICHA USUARIO': '14850', 'USUARIO ASIGNADO': 'Leon Velasquez, Jorge Luis', 'CARGO': 'Analista de Recursos Humanos', 'TIPO ASIGNACIÓN': 'ESTABLE', 'TÉCNICO RESPONSABLE': 'Gerardo Flavio Mendoza Pacheco' },
+// ============================================================
+// GOOGLE APPS SCRIPT — RECEPTOR DE MANTENIMIENTO SEDAPAL v7
+// ============================================================
+// NUEVO v7: Genera PDF (RMP) automáticamente y lo guarda en Drive
+// + Firmas del técnico y usuario guardadas en Drive
+// + PDF organizado por carpetas mensuales
+// + Link del PDF en la hoja de Sheets
+//
+// INSTRUCCIONES:
+// 1. Apps Script → Borra todo → Pega este código → Guarda
+// 2. Implementar → Gestionar implementaciones → ✏️ → Nueva versión → Implementar
+// 3. Se crearán carpetas automáticas en Drive
+// ============================================================
+
+var SHEET_NAME = "REGISTROS_MANTENIMIENTO";
+var DRIVE_FOLDER_NAME = "SEDAPAL_Fotos_Mantenimiento";
+var PDF_FOLDER_NAME = "SEDAPAL_RMP_PDF";
+
+var COLUMNS = [
+  "FECHA", "TÉCNICO", "CÓDIGO_INVENTARIO", "CATEGORÍA", "TIPO_DE_EQUIPO",
+  "MARCA", "MODELO", "SERIE_EQUIPO", "PROPIETARIO", "NOMBRE_HOST",
+  "DIRECCIÓN_IP", "PROCESADOR", "MEMORIA_RAM", "ALMACENAMIENTO",
+  "MARCA_MONITOR_1", "MODELO_MONITOR_1", "SERIE_MONITOR_1", "PULGADAS_MONITOR_1",
+  "MARCA_MONITOR_2", "MODELO_MONITOR_2", "SERIE_MONITOR_2", "PULGADAS_MONITOR_2",
+  "MARCA_TECLADO", "TIPO_TECLADO", "SERIE_TECLADO",
+  "MARCA_MOUSE", "TIPO_MOUSE", "SERIE_MOUSE",
+  "SEDE", "ZONA_DE_INVENTARIO", "PISO", "REFERENCIA_UBICACIÓN",
+  "GERENCIA", "EQUIPO_FUNCIONAL", "GRUPO_FUNCIONAL",
+  "FICHA_USUARIO", "USUARIO_ASIGNADO", "CARGO", "TIPO_ASIGNACIÓN", "TÉCNICO_RESPONSABLE",
+  "CAMBIOS_REALIZADOS", "USUARIO_CONFORMIDAD", "DNI_USUARIO",
+  "ESTADO_CONFORMIDAD", "OBSERVACIONES", "TIENE_FIRMA", "VALIDACION_SERIES",
+  "FOTO_EQUIPO", "FOTO_CODIGO", "FOTO_CAMBIO",
+  "ENCUESTA_TRATO", "ENCUESTA_CONFORMIDAD",
+  "FIRMA_TECNICO_LINK", "FIRMA_USUARIO_LINK",
+  "PDF_RMP_LINK", "HORA_INICIO", "HORA_FIN", "DURACION"
 ];
 
-// ===== FIELD CONFIG (organized by groups) =====
-const FIELD_GROUPS = [
-  {
-    name: '📦 DATOS DEL EQUIPO',
-    color: '#0057A8',
-    fields: [
-      { key: 'CÓDIGO INVENTARIO', label: 'Código de Inventario', editable: false, isCode: true },
-      { key: 'CATEGORÍA', label: 'Categoría', editable: false },
-      { key: 'TIPO DE EQUIPO', label: 'Tipo de Equipo', editable: false },
-      { key: 'MARCA', label: 'Marca', editable: true },
-      { key: 'MODELO', label: 'Modelo', editable: true },
-      { key: 'SERIE EQUIPO', label: 'Serie del Equipo (CPU/Laptop)', editable: true, isSerie: true },
-      { key: 'PROPIETARIO', label: 'Propietario', editable: false },
-      { key: 'NOMBRE HOST', label: 'Nombre de Host', editable: true },
-      { key: 'DIRECCIÓN IP', label: 'Dirección IP', editable: true },
-      { key: 'PROCESADOR', label: 'Procesador', editable: false },
-      { key: 'MEMORIA RAM', label: 'Memoria RAM', editable: false },
-      { key: 'ALMACENAMIENTO', label: 'Almacenamiento', editable: false },
-    ]
-  },
-  {
-    name: '🖥️ MONITOR PRINCIPAL',
-    color: '#0891B2',
-    fields: [
-      { key: 'MARCA MONITOR 1', label: 'Marca Monitor 1', editable: true },
-      { key: 'MODELO MONITOR 1', label: 'Modelo Monitor 1', editable: true },
-      { key: 'SERIE MONITOR 1', label: 'Serie Monitor 1', editable: true, isSerie: true },
-      { key: 'PULGADAS MONITOR 1', label: 'Pulgadas', editable: false },
-    ]
-  },
-  {
-    name: '🖥️ SEGUNDO MONITOR',
-    color: '#7C3AED',
-    fields: [
-      { key: 'MARCA MONITOR 2', label: 'Marca Monitor 2', editable: true },
-      { key: 'MODELO MONITOR 2', label: 'Modelo Monitor 2', editable: true },
-      { key: 'SERIE MONITOR 2', label: 'Serie Monitor 2', editable: true, isSerie: true },
-      { key: 'PULGADAS MONITOR 2', label: 'Pulgadas', editable: false },
-    ]
-  },
-  {
-    name: '⌨️ TECLADO',
-    color: '#D97706',
-    fields: [
-      { key: 'MARCA TECLADO', label: 'Marca Teclado', editable: true },
-      { key: 'TIPO TECLADO', label: 'Tipo Teclado', editable: false },
-      { key: 'SERIE TECLADO', label: 'Serie Teclado', editable: true, isSerie: true },
-    ]
-  },
-  {
-    name: '🖱️ MOUSE',
-    color: '#059669',
-    fields: [
-      { key: 'MARCA MOUSE', label: 'Marca Mouse', editable: true },
-      { key: 'TIPO MOUSE', label: 'Tipo Mouse', editable: false },
-      { key: 'SERIE MOUSE', label: 'Serie Mouse', editable: true, isSerie: true },
-    ]
-  },
-  {
-    name: '📍 UBICACIÓN',
-    color: '#2563EB',
-    fields: [
-      { key: 'SEDE', label: 'Sede', editable: false },
-      { key: 'ZONA DE INVENTARIO', label: 'Zona de Inventario', editable: true },
-      { key: 'PISO', label: 'Piso', editable: true },
-      { key: 'REFERENCIA UBICACIÓN', label: 'Referencia de Ubicación', editable: true },
-    ]
-  },
-  {
-    name: '🏢 ORGANIZACIÓN',
-    color: '#7C2D12',
-    fields: [
-      { key: 'GERENCIA', label: 'Gerencia', editable: true },
-      { key: 'EQUIPO FUNCIONAL', label: 'Equipo Funcional', editable: true },
-      { key: 'GRUPO FUNCIONAL', label: 'Grupo Funcional', editable: true },
-    ]
-  },
-  {
-    name: '👤 USUARIO ASIGNADO',
-    color: '#4338CA',
-    fields: [
-      { key: 'FICHA USUARIO', label: 'Ficha', editable: true, isAutoFicha: true },
-      { key: 'USUARIO ASIGNADO', label: 'Nombre del Usuario', editable: true },
-      { key: 'CARGO', label: 'Cargo', editable: true },
-      { key: 'TIPO ASIGNACIÓN', label: 'Tipo de Asignación', editable: true },
-      { key: 'TÉCNICO RESPONSABLE', label: 'Técnico Responsable', editable: false },
-    ]
-  },
-];
-
-// Flat version for compatibility
-const FIELD_CONFIG = FIELD_GROUPS.flatMap(g => g.fields);
-
-// ===== INIT =====
-document.addEventListener('DOMContentLoaded', () => {
-  initDate();
-  loadConfig();
-  initSignature();
-  initTechSignature();
-  initEventListeners();
-});
-
-function initDate() {
-  const now = new Date();
-  document.getElementById('currentDate').textContent = now.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function initEventListeners() {
-  document.getElementById('equipCode').addEventListener('keypress', e => {
-    if (e.key === 'Enter') searchEquipment();
-  });
-
-  document.getElementById('connectionBadge').addEventListener('click', toggleConfig);
-
-  document.getElementById('maintStatus').addEventListener('change', function() {
-    document.getElementById('obsGroup').style.display = this.value.includes('observaciones') || this.value === 'No conforme' ? 'block' : 'none';
-  });
-
-  document.getElementById('serialInput').addEventListener('keypress', e => {
-    if (e.key === 'Enter') verifySerial();
-  });
-}
-
-// ===== CONFIG =====
-function toggleConfig() {
-  const panel = document.getElementById('configPanel');
-  panel.classList.toggle('active');
-}
-
-function loadConfig() {
+function doPost(e) {
   try {
-    const saved = localStorage.getItem('sedapal_maint_config');
-    if (saved) {
-      Object.assign(APP.config, JSON.parse(saved));
-      document.getElementById('sheetId').value = APP.config.sheetId;
-      document.getElementById('sheetName').value = APP.config.sheetName;
-      document.getElementById('apiKey').value = APP.config.apiKey;
-      document.getElementById('publicMode').checked = APP.config.publicMode;
-      if (APP.config.webhookUrl) document.getElementById('webhookUrl').value = APP.config.webhookUrl;
-      updateConnectionStatus();
-    }
-
-    // Try loading cached CSV data first
-    if (!loadCachedCSV()) {
-      // Try auto-loading CSV from same directory (GitHub Pages)
-      autoLoadCSV();
-    }
-
-    const savedHistory = localStorage.getItem('sedapal_maint_history_' + new Date().toISOString().slice(0, 10));
-    if (savedHistory) {
-      APP.history = JSON.parse(savedHistory);
-      renderHistory();
-    }
-  } catch(e) { console.log('Config load error:', e); }
-}
-
-function saveConfig() {
-  APP.config.sheetId = document.getElementById('sheetId').value.trim();
-  APP.config.sheetName = document.getElementById('sheetName').value.trim() || 'Inventario_Mantenimiento';
-  APP.config.apiKey = document.getElementById('apiKey').value.trim();
-  APP.config.publicMode = document.getElementById('publicMode').checked;
-  APP.config.webhookUrl = document.getElementById('webhookUrl').value.trim();
-  APP.config.connected = !!(APP.config.sheetId && (APP.config.apiKey || APP.config.publicMode)) || !!APP.csvData || !!APP.config.webhookUrl;
-  APP.isDemo = false;
-
-  localStorage.setItem('sedapal_maint_config', JSON.stringify(APP.config));
-  updateConnectionStatus();
-
-  if (APP.config.connected || APP.csvData || APP.config.webhookUrl) {
-    document.getElementById('configPanel').classList.remove('active');
-    showToast('✅ Configuración guardada');
-  } else {
-    showError('Configuración incompleta', 'Cargue un archivo CSV, o ingrese el ID del Sheet, o configure la URL del Web App.');
-  }
-}
-
-function loadDemoData() {
-  APP.isDemo = true;
-  APP.config.connected = true;
-  APP.csvData = null;
-  updateConnectionStatus();
-  document.getElementById('configPanel').classList.remove('active');
-  showToast('🎮 Modo Demo — Prueba con: COL2264, COL1998, 1810103, COL0815');
-}
-
-// ===== CSV FILE LOADING =====
-function loadCSVFile(input) {
-  const file = input.files[0];
-  if (!file) return;
-
-  showToast('📂 Cargando archivo...');
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const text = e.target.result;
-      const data = parseCSV(text);
-      if (data.length === 0) {
-        showError('Archivo vacío', 'El archivo CSV no contiene datos válidos.');
-        return;
-      }
-      APP.csvData = data;
-      APP.isDemo = false;
-      APP.config.connected = true;
-
-      // Save to localStorage for persistence
-      try { localStorage.setItem('sedapal_csv_data', text); } catch(e) { /* too large */ }
-      try { localStorage.setItem('sedapal_csv_date', new Date().toISOString()); } catch(e) {}
-
-      updateConnectionStatus();
-      document.getElementById('csvStatus').style.display = 'flex';
-      document.getElementById('csvStatus').innerHTML = `✅ ${data.length} equipos cargados desde CSV — ${file.name}`;
-      document.getElementById('configPanel').classList.remove('active');
-      showToast(`✅ ${data.length} equipos cargados correctamente`);
-    } catch(err) {
-      showError('Error al leer CSV', 'No se pudo procesar el archivo: ' + err.message);
-    }
-  };
-  reader.readAsText(file, 'UTF-8');
-}
-
-function parseCSV(text) {
-  const lines = text.split('\n').filter(l => l.trim());
-  if (lines.length < 2) return [];
-
-  // Parse header
-  const headers = parseCSVLine(lines[0]);
-  const data = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    const values = parseCSVLine(lines[i]);
-    if (values.length < 3) continue; // skip empty rows
-    const obj = {};
-    headers.forEach((h, idx) => {
-      const val = (values[idx] || '').trim();
-      if (val && val !== 'nan' && val !== 'None' && val !== 'NaT') {
-        obj[h.trim()] = val;
-      }
-    });
-    if (obj['CÓDIGO INVENTARIO'] || obj[headers[0]]) {
-      data.push(obj);
-    }
-  }
-  return data;
-}
-
-function parseCSVLine(line) {
-  const result = [];
-  let current = '';
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      if (inQuotes && line[i+1] === '"') { current += '"'; i++; }
-      else { inQuotes = !inQuotes; }
-    } else if (ch === ',' && !inQuotes) {
-      result.push(current);
-      current = '';
+    var data;
+    if (e.parameter && e.parameter.data) {
+      data = JSON.parse(e.parameter.data);
+    } else if (e.postData && e.postData.contents) {
+      data = JSON.parse(e.postData.contents);
     } else {
-      current += ch;
+      throw new Error("No data received");
     }
-  }
-  result.push(current);
-  return result;
-}
-
-function loadCachedCSV() {
-  try {
-    const cached = localStorage.getItem('sedapal_csv_data');
-    const cachedDate = localStorage.getItem('sedapal_csv_date');
-    if (cached) {
-      const data = parseCSV(cached);
-      if (data.length > 0) {
-        APP.csvData = data;
-        APP.config.connected = true;
-        updateConnectionStatus();
-        const dateStr = cachedDate ? new Date(cachedDate).toLocaleDateString('es-PE') : 'fecha desconocida';
-        document.getElementById('csvStatus').style.display = 'flex';
-        document.getElementById('csvStatus').innerHTML = `✅ ${data.length} equipos en memoria (cargado: ${dateStr})`;
-        return true;
-      }
-    }
-  } catch(e) {}
-  return false;
-}
-
-async function autoLoadCSV() {
-  try {
-    const resp = await fetch('inventario_mantenimiento.csv');
-    if (!resp.ok) throw new Error('No CSV file');
-    const text = await resp.text();
-    const data = parseCSV(text);
-    if (data.length > 0) {
-      APP.csvData = data;
-      APP.config.connected = true;
-      try { localStorage.setItem('sedapal_csv_data', text); } catch(e) {}
-      try { localStorage.setItem('sedapal_csv_date', new Date().toISOString()); } catch(e) {}
-      updateConnectionStatus();
-      document.getElementById('csvStatus').style.display = 'flex';
-      document.getElementById('csvStatus').innerHTML = `✅ ${data.length} equipos cargados automáticamente`;
-      showToast(`✅ ${data.length} equipos cargados`);
-      return;
-    }
-  } catch(e) {
-    console.log('Auto-load CSV not available:', e.message);
-  }
-  // If auto-load failed, show config
-  if (!APP.config.connected) {
-    document.getElementById('configPanel').classList.add('active');
-  }
-}
-
-function updateConnectionStatus() {
-  const badge = document.getElementById('connectionBadge');
-  const status = document.getElementById('configStatus');
-
-  if (APP.isDemo) {
-    badge.textContent = '🎮 Demo';
-    badge.style.background = 'rgba(245,158,11,0.2)';
-    status.className = 'config-status connected';
-    status.textContent = '🟡 Modo Demo activo';
-  } else if (APP.csvData) {
-    badge.textContent = `📂 ${APP.csvData.length}`;
-    badge.style.background = 'rgba(16,185,129,0.2)';
-    status.className = 'config-status connected';
-    status.textContent = `🟢 CSV cargado — ${APP.csvData.length} equipos`;
-  } else if (APP.config.connected) {
-    badge.textContent = '🟢 Online';
-    badge.style.background = 'rgba(16,185,129,0.2)';
-    status.className = 'config-status connected';
-    status.textContent = '🟢 Conectado a Google Sheets';
-  } else {
-    badge.textContent = '⚙️ Config';
-    badge.style.background = 'rgba(255,255,255,0.15)';
-    status.className = 'config-status disconnected';
-    status.textContent = '🔴 No conectado a Google Sheets';
-  }
-}
-
-// ===== SEARCH =====
-async function searchEquipment() {
-  const code = document.getElementById('equipCode').value.trim();
-  if (!code) { showToast('⚠️ Ingrese un código de inventario'); return; }
-  if (!APP.config.connected && !APP.isDemo && !APP.csvData) { showError('Sin datos', 'Cargue un archivo CSV o configure Google Sheets primero. Toque ⚙️ arriba.'); return; }
-
-  showLoader(true);
-  APP.startTime = new Date().toISOString();
-  document.getElementById('equipmentSection').style.display = 'none';
-
-  try {
-    let data;
-    if (APP.isDemo) {
-      await delay(800);
-      data = DEMO_DATA.find(r => r['CÓDIGO INVENTARIO'].toLowerCase().includes(code.toLowerCase()));
-    } else if (APP.csvData) {
-      await delay(300);
-      // Search in loaded CSV data
-      data = APP.csvData.find(r => {
-        const ci = (r['CÓDIGO INVENTARIO'] || r[Object.keys(r)[0]] || '').toString().toLowerCase();
-        return ci === code.toLowerCase() || ci.includes(code.toLowerCase());
-      });
-    } else {
-      data = await fetchFromSheets(code);
-    }
-
-    showLoader(false);
-
-    if (data) {
-      APP.currentEquipment = { ...data };
-      APP.originalData = { ...data };
-      APP.changes = [];
-      // Reset serial validation
-      Object.keys(serialValidation).forEach(k => delete serialValidation[k]);
-      SERIAL_FIELDS.forEach(sf => {
-        if (findFieldValue(data, sf.key)) serialValidation[sf.key] = 'pending';
-      });
-      renderEquipment(data);
-      renderSerialChecklist();
-      document.getElementById('equipmentSection').style.display = 'block';
-      document.getElementById('equipmentSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      showToast('✅ Equipo encontrado');
-      // Auto-fill user conformity from equipment data
-      const assignedUser = findFieldValue(data, 'USUARIO ASIGNADO');
-      const assignedFicha = findFieldValue(data, 'FICHA USUARIO');
-      const assignedCargo = findFieldValue(data, 'CARGO');
-      if (assignedFicha) {
-        document.getElementById('userFicha').value = assignedFicha;
-        document.getElementById('userName').value = assignedUser || '';
-        document.getElementById('userCargo').value = assignedCargo || '';
-        document.getElementById('nameAutoTag').style.display = 'inline';
-        document.getElementById('cargoAutoTag').style.display = 'inline';
-        document.getElementById('fichaResult').style.display = 'block';
-        document.getElementById('fichaResult').style.background = '#ECFDF5';
-        document.getElementById('fichaResult').style.border = '1px solid #A7F3D0';
-        document.getElementById('fichaResult').innerHTML = '<span style="color:#065F46;">✅ <strong>' + (assignedUser||'') + '</strong> — ' + (assignedCargo||'') + '</span>';
-      }
-    } else {
-      showError('Equipo no encontrado', `No se encontró ningún equipo con el código "${code}". Verifique el código e intente nuevamente.`);
-    }
-  } catch (err) {
-    showLoader(false);
-    showError('Error de conexión', 'No se pudo conectar con Google Sheets. Verifique su configuración e internet. ' + err.message);
-  }
-}
-
-async function fetchFromSheets(code) {
-  let url;
-  if (APP.config.publicMode) {
-    url = `https://docs.google.com/spreadsheets/d/${APP.config.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(APP.config.sheetName)}&tq=${encodeURIComponent("SELECT * WHERE A CONTAINS '" + code.replace(/'/g, "''") + "'")}`;
-  } else {
-    const range = `${APP.config.sheetName}!A:J`;
-    url = `https://sheets.googleapis.com/v4/spreadsheets/${APP.config.sheetId}/values/${encodeURIComponent(range)}?key=${APP.config.apiKey}`;
-  }
-
-  const resp = await fetch(url);
-
-  if (APP.config.publicMode) {
-    const text = await resp.text();
-    const json = JSON.parse(text.substring(47).slice(0, -2));
-    const cols = json.table.cols.map(c => c.label);
-    const rows = json.table.rows;
-
-    if (rows.length === 0) return null;
-
-    const row = rows[0];
-    const obj = {};
-    cols.forEach((col, i) => {
-      if (col) obj[col] = row.c[i] ? row.c[i].v : '';
-    });
-    return obj;
-  } else {
-    const json = await resp.json();
-    if (!json.values || json.values.length < 2) return null;
-
-    const headers = json.values[0];
-    const found = json.values.slice(1).find(row => {
-      const codeIdx = headers.findIndex(h => h.toUpperCase().includes('CÓDIGO') || h.toUpperCase().includes('CODIGO') || h.toUpperCase().includes('INVENTARIO'));
-      return codeIdx >= 0 && row[codeIdx] && row[codeIdx].toLowerCase().includes(code.toLowerCase());
-    });
-
-    if (!found) return null;
-
-    const obj = {};
-    headers.forEach((h, i) => { obj[h] = found[i] || ''; });
-    return obj;
-  }
-}
-
-// ===== RENDER EQUIPMENT =====
-function renderEquipment(data) {
-  const grid = document.getElementById('dataGrid');
-  grid.innerHTML = '';
-
-  FIELD_GROUPS.forEach(group => {
-    // Check if group has any data
-    const hasData = group.fields.some(f => {
-      const val = findFieldValue(data, f.key);
-      return val && val.trim() !== '';
-    });
-    if (!hasData && group.name.includes('SEGUNDO MONITOR')) return; // skip empty 2nd monitor
-
-    // Group header
-    const groupDiv = document.createElement('div');
-    groupDiv.style.cssText = `margin-top:12px;margin-bottom:8px;padding:6px 10px;background:${group.color}15;border-left:3px solid ${group.color};border-radius:0 6px 6px 0;font-size:12px;font-weight:700;color:${group.color};letter-spacing:0.5px;`;
-    groupDiv.textContent = group.name;
-    grid.appendChild(groupDiv);
-
-    group.fields.forEach(field => {
-      const value = findFieldValue(data, field.key);
-      if (!value && !field.editable) return; // skip empty non-editable
-
-      const div = document.createElement('div');
-      div.className = 'field-group';
-
-      const serieTag = field.isSerie ? `<span style="display:inline-block;background:#FEF2F2;color:#DC2626;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:4px;">VALIDAR</span>` : '';
-      const codeStyle = field.isCode ? `font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--primary);font-size:15px;` : '';
-
-      if (field.editable) {
-        const autoFichaAttr = field.isAutoFicha ? 'oninput="autocompleteFichaEquipo(this.value)" inputmode="numeric"' : '';
-        const autoFichaHint = field.isAutoFicha ? '<div style="font-size:10px;color:#0891B2;margin-top:2px;">💡 Cambie la ficha para actualizar el usuario</div>' : '';
-        div.innerHTML = `
-          <div class="field-label">${field.label}${serieTag}</div>
-          <input type="text" class="field-input" 
-            data-key="${field.key}" 
-            data-original="${value}" 
-            value="${value}" 
-            style="${field.isSerie ? 'font-family:JetBrains Mono,monospace;color:#DC2626;font-weight:600;' : ''}"
-            onchange="trackChange(this)" ${autoFichaAttr}>
-          ${autoFichaHint}
-          <div id="fichaEquipoResult" style="display:none;margin-top:4px;padding:6px 10px;border-radius:6px;font-size:12px;"></div>
-        `;
+    
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) sheet = createSheet(ss);
+    
+    var code = data["CÓDIGO_INVENTARIO"] || "SIN_CODIGO";
+    var fecha = (data["FECHA"] || "").replace(/[\/: ]/g, "_").substring(0, 15);
+    
+    // ===== SAVE PHOTOS TO DRIVE =====
+    var photoFields = ["FOTO_EQUIPO", "FOTO_CODIGO", "FOTO_CAMBIO"];
+    var photoNames = ["equipo", "codigo_inv", "cambio_periferico"];
+    for (var i = 0; i < photoFields.length; i++) {
+      var base64 = data[photoFields[i]];
+      if (base64 && base64.length > 100) {
+        data[photoFields[i]] = savePhotoToDrive(base64, code + "_" + photoNames[i] + "_" + fecha + ".jpg");
       } else {
-        div.innerHTML = `
-          <div class="field-label">${field.label}</div>
-          <div class="field-value" style="${codeStyle}">${value || '—'}</div>
-        `;
+        data[photoFields[i]] = "";
       }
-      grid.appendChild(div);
-    });
-  });
-
-  updateValidationStatus();
-}
-
-function findFieldValue(data, key) {
-  if (data[key] !== undefined) return data[key];
-  const upperKey = key.toUpperCase();
-  for (let k of Object.keys(data)) {
-    if (k.toUpperCase() === upperKey || k.toUpperCase().includes(upperKey.split('/')[0])) return data[k];
-  }
-  return '';
-}
-
-function trackChange(input) {
-  const key = input.dataset.key;
-  const original = input.dataset.original;
-  const current = input.value;
-
-  APP.changes = APP.changes.filter(c => c.field !== key);
-  if (current !== original) {
-    APP.changes.push({ field: key, original, updated: current });
-  }
-
-  if (APP.currentEquipment) {
-    APP.currentEquipment[key] = current;
-  }
-
-  updateValidationStatus();
-  renderChanges();
-}
-
-function updateValidationStatus() {
-  const bar = document.getElementById('validationBar');
-  const badge = document.getElementById('matchBadge');
-
-  if (APP.changes.length === 0) {
-    bar.style.display = 'flex';
-    bar.className = 'validation-bar match';
-    bar.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg> Todos los datos coinciden con la base de datos';
-    badge.textContent = '✅ OK';
-    badge.style.background = 'var(--success-bg)';
-    badge.style.color = 'var(--success)';
-  } else {
-    bar.style.display = 'flex';
-    bar.className = 'validation-bar mismatch';
-    bar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> ${APP.changes.length} campo(s) modificado(s)`;
-    badge.textContent = `⚠️ ${APP.changes.length}`;
-    badge.style.background = 'var(--warning-bg)';
-    badge.style.color = 'var(--warning)';
-  }
-}
-
-function renderChanges() {
-  const log = document.getElementById('changesLog');
-  const list = document.getElementById('changesList');
-
-  if (APP.changes.length === 0) {
-    log.style.display = 'none';
-    return;
-  }
-
-  log.style.display = 'block';
-  list.innerHTML = APP.changes.map(c => `
-    <div class="change-item">
-      <span>🔄</span>
-      <span><strong>${c.field}:</strong> "${c.original}" → "${c.updated}"</span>
-    </div>
-  `).join('');
-}
-
-// ===== SERIAL VERIFICATION =====
-const SERIAL_FIELDS = [
-  { key: 'SERIE EQUIPO', label: 'Serie Equipo (CPU/Laptop)', icon: '💻' },
-  { key: 'SERIE MONITOR 1', label: 'Serie Monitor Principal', icon: '🖥️' },
-  { key: 'SERIE MONITOR 2', label: 'Serie Segundo Monitor', icon: '🖥️' },
-  { key: 'SERIE TECLADO', label: 'Serie Teclado', icon: '⌨️' },
-  { key: 'SERIE MOUSE', label: 'Serie Mouse', icon: '🖱️' },
-];
-
-const serialValidation = {};
-
-function renderSerialChecklist() {
-  const container = document.getElementById('serialChecklist');
-  if (!APP.currentEquipment) return;
-
-  container.innerHTML = SERIAL_FIELDS.map(sf => {
-    const dbVal = findFieldValue(APP.currentEquipment, sf.key);
-    if (!dbVal) return '';
-    const status = serialValidation[sf.key];
-    const statusIcon = status === 'ok' ? '✅' : status === 'fail' ? '❌' : '⏳';
-    const statusColor = status === 'ok' ? '#10B981' : status === 'fail' ? '#EF4444' : '#94A3B8';
-    const statusBg = status === 'ok' ? '#ECFDF5' : status === 'fail' ? '#FEF2F2' : '#F8FAFC';
-
-    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:${statusBg};border-radius:8px;border:1px solid ${statusColor}20;">
-      <span style="font-size:16px;">${statusIcon}</span>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:11px;font-weight:600;color:var(--text-secondary);">${sf.icon} ${sf.label}</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:${statusColor};overflow:hidden;text-overflow:ellipsis;">${dbVal}</div>
-      </div>
-      <span style="font-size:10px;font-weight:700;color:${statusColor};text-transform:uppercase;">${status === 'ok' ? 'Validado' : status === 'fail' ? 'No coincide' : 'Pendiente'}</span>
-    </div>`;
-  }).filter(Boolean).join('');
-}
-
-function verifySerialAuto() {
-  const input = document.getElementById('serialInput').value.trim();
-  const result = document.getElementById('serialResult');
-
-  if (!input) { showToast('⚠️ Ingrese un número de serie'); return; }
-  if (!APP.currentEquipment) { showToast('⚠️ Primero busque un equipo'); return; }
-
-  let found = false;
-  SERIAL_FIELDS.forEach(sf => {
-    const dbVal = findFieldValue(APP.currentEquipment, sf.key);
-    if (dbVal && input.toLowerCase() === dbVal.toLowerCase()) {
-      serialValidation[sf.key] = 'ok';
-      found = true;
-      result.innerHTML = `<div class="validation-bar match">✅ ¡Coincide! Serie "${input}" corresponde a: <strong>${sf.label}</strong></div>`;
     }
-  });
-
-  if (!found) {
-    // Check which serials exist for a helpful message
-    const existing = SERIAL_FIELDS.filter(sf => findFieldValue(APP.currentEquipment, sf.key)).map(sf => `${sf.icon} ${sf.label}: <strong>${findFieldValue(APP.currentEquipment, sf.key)}</strong>`);
-    result.innerHTML = `<div class="validation-bar mismatch">⚠️ Serie "${input}" no coincide con ningún periférico registrado.</div>
-    <div style="margin-top:8px;padding:10px;background:#F8FAFC;border-radius:8px;font-size:12px;line-height:1.8;">
-      <strong>Series registradas:</strong><br>${existing.join('<br>')}
-    </div>`;
-  }
-
-  document.getElementById('serialInput').value = '';
-  renderSerialChecklist();
-}
-
-function verifySerial() { verifySerialAuto(); }
-
-// ===== SCANNER =====
-async function startBarcodeScanner() {
-  APP.scanMode = 'code';
-  await startCamera();
-}
-
-async function startSerialScanner() {
-  APP.scanMode = 'serial_search';
-  await startCamera();
-}
-
-async function startSerialScanVerify() {
-  APP.scanMode = 'serial_verify';
-  await startCamera();
-}
-
-async function startCamera() {
-  const container = document.getElementById('scannerContainer');
-  const video = document.getElementById('scannerVideo');
-
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-    });
-    APP.scanStream = stream;
-    video.srcObject = stream;
-    container.style.display = 'block';
-    showToast('📸 Cámara activa — Apunte al código');
-
-    // Simple barcode detection using BarcodeDetector API if available
-    if ('BarcodeDetector' in window) {
-      const detector = new BarcodeDetector({ formats: ['code_128', 'code_39', 'ean_13', 'qr_code', 'data_matrix'] });
-      const scanInterval = setInterval(async () => {
-        if (!APP.scanStream) { clearInterval(scanInterval); return; }
-        try {
-          const barcodes = await detector.detect(video);
-          if (barcodes.length > 0) {
-            const value = barcodes[0].rawValue;
-            clearInterval(scanInterval);
-            handleScannedValue(value);
-            stopScanner();
-          }
-        } catch(e) { /* continue scanning */ }
-      }, 500);
-    } else {
-      showToast('ℹ️ Detección automática no disponible. Ingrese el valor manualmente.');
-    }
-  } catch(err) {
-    showError('Error de cámara', 'No se pudo acceder a la cámara. Verifique los permisos del navegador.');
-  }
-}
-
-function handleScannedValue(value) {
-  if (APP.scanMode === 'code') {
-    document.getElementById('equipCode').value = value;
-    searchEquipment();
-  } else if (APP.scanMode === 'serial_search') {
-    document.getElementById('equipCode').value = value;
-    searchEquipment();
-  } else if (APP.scanMode === 'serial_verify') {
-    document.getElementById('serialInput').value = value;
-    verifySerial();
-  }
-  showToast('✅ Código escaneado: ' + value);
-}
-
-function stopScanner() {
-  const container = document.getElementById('scannerContainer');
-  if (APP.scanStream) {
-    APP.scanStream.getTracks().forEach(t => t.stop());
-    APP.scanStream = null;
-  }
-  container.style.display = 'none';
-}
-
-// ===== SIGNATURE =====
-function initSignature() {
-  const canvas = document.getElementById('signatureCanvas');
-  const ctx = canvas.getContext('2d');
-
-  function resize() {
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * 2;
-    canvas.height = rect.height * 2;
-    ctx.scale(2, 2);
-    ctx.strokeStyle = '#1E293B';
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    redrawSignature();
-  }
-
-  resize();
-  window.addEventListener('resize', resize);
-
-  let drawing = false;
-
-  function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    const touch = e.touches ? e.touches[0] : e;
-    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
-  }
-
-  function startDraw(e) {
-    e.preventDefault();
-    drawing = true;
-    APP.currentStroke = [getPos(e)];
-    document.getElementById('sigPlaceholder').style.display = 'none';
-  }
-
-  function draw(e) {
-    if (!drawing) return;
-    e.preventDefault();
-    const pos = getPos(e);
-    APP.currentStroke.push(pos);
-
-    ctx.beginPath();
-    const pts = APP.currentStroke;
-    if (pts.length >= 2) {
-      ctx.moveTo(pts[pts.length-2].x, pts[pts.length-2].y);
-      ctx.lineTo(pos.x, pos.y);
-      ctx.stroke();
-    }
-  }
-
-  function endDraw(e) {
-    if (!drawing) return;
-    e.preventDefault();
-    drawing = false;
-    if (APP.currentStroke.length > 1) {
-      APP.signatureStrokes.push([...APP.currentStroke]);
-      APP.hasSigned = true;
-      canvas.classList.add('signed');
-    }
-    APP.currentStroke = [];
-  }
-
-  canvas.addEventListener('mousedown', startDraw);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', endDraw);
-  canvas.addEventListener('mouseleave', endDraw);
-  canvas.addEventListener('touchstart', startDraw, { passive: false });
-  canvas.addEventListener('touchmove', draw, { passive: false });
-  canvas.addEventListener('touchend', endDraw, { passive: false });
-}
-
-function redrawSignature() {
-  const canvas = document.getElementById('signatureCanvas');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle = '#1E293B';
-  ctx.lineWidth = 2.5;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-
-  APP.signatureStrokes.forEach(stroke => {
-    if (stroke.length < 2) return;
-    ctx.beginPath();
-    ctx.moveTo(stroke[0].x, stroke[0].y);
-    for (let i = 1; i < stroke.length; i++) {
-      ctx.lineTo(stroke[i].x, stroke[i].y);
-    }
-    ctx.stroke();
-  });
-}
-
-function clearSignature() {
-  APP.signatureStrokes = [];
-  APP.hasSigned = false;
-  const canvas = document.getElementById('signatureCanvas');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  canvas.classList.remove('signed');
-  document.getElementById('sigPlaceholder').style.display = 'block';
-}
-
-function undoSignature() {
-  if (APP.signatureStrokes.length === 0) return;
-  APP.signatureStrokes.pop();
-  if (APP.signatureStrokes.length === 0) {
-    APP.hasSigned = false;
-    document.getElementById('signatureCanvas').classList.remove('signed');
-    document.getElementById('sigPlaceholder').style.display = 'block';
-  }
-  redrawSignature();
-}
-
-// ===== SURVEY =====
-const APP_SURVEY = { trato: 0, conformidad: 0 };
-function setSurvey(type, val) {
-  APP_SURVEY[type] = val;
-  const groupId = type === 'trato' ? 'surveyTratoGroup' : 'surveyConformidadGroup';
-  document.getElementById(groupId).querySelectorAll('button').forEach(btn => {
-    const bv = parseInt(btn.dataset.val);
-    if (bv === val) {
-      btn.style.background = '#0057A8';
-      btn.style.color = '#FFF';
-      btn.style.borderColor = '#0057A8';
-    } else {
-      btn.style.background = '#FFF';
-      btn.style.color = '#000';
-      btn.style.borderColor = '#CBD5E1';
-    }
-  });
-}
-
-// ===== TECH SIGNATURE =====
-let techSignatureStrokes = [];
-let techCurrentStroke = [];
-let techHasSigned = false;
-
-function initTechSignature() {
-  const canvas = document.getElementById('techSignatureCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-
-  function resize() {
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * 2;
-    canvas.height = rect.height * 2;
-    ctx.scale(2, 2);
-    ctx.strokeStyle = '#0057A8';
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    redrawTechSignature();
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  let drawing = false;
-  function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    const touch = e.touches ? e.touches[0] : e;
-    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
-  }
-  function startDraw(e) {
-    e.preventDefault(); drawing = true;
-    techCurrentStroke = [getPos(e)];
-    document.getElementById('techSigPlaceholder').style.display = 'none';
-  }
-  function draw(e) {
-    if (!drawing) return; e.preventDefault();
-    const pos = getPos(e); techCurrentStroke.push(pos);
-    ctx.beginPath();
-    if (techCurrentStroke.length >= 2) {
-      ctx.moveTo(techCurrentStroke[techCurrentStroke.length-2].x, techCurrentStroke[techCurrentStroke.length-2].y);
-      ctx.lineTo(pos.x, pos.y); ctx.stroke();
-    }
-  }
-  function endDraw(e) {
-    if (!drawing) return; e.preventDefault(); drawing = false;
-    if (techCurrentStroke.length > 1) { techSignatureStrokes.push([...techCurrentStroke]); techHasSigned = true; canvas.classList.add('signed'); }
-    techCurrentStroke = [];
-  }
-  canvas.addEventListener('mousedown', startDraw);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', endDraw);
-  canvas.addEventListener('mouseleave', endDraw);
-  canvas.addEventListener('touchstart', startDraw, { passive: false });
-  canvas.addEventListener('touchmove', draw, { passive: false });
-  canvas.addEventListener('touchend', endDraw, { passive: false });
-}
-
-function redrawTechSignature() {
-  const canvas = document.getElementById('techSignatureCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle = '#0057A8'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  techSignatureStrokes.forEach(stroke => {
-    if (stroke.length < 2) return;
-    ctx.beginPath(); ctx.moveTo(stroke[0].x, stroke[0].y);
-    for (let i = 1; i < stroke.length; i++) ctx.lineTo(stroke[i].x, stroke[i].y);
-    ctx.stroke();
-  });
-}
-
-function clearTechSignature() {
-  techSignatureStrokes = []; techHasSigned = false;
-  const canvas = document.getElementById('techSignatureCanvas');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  canvas.classList.remove('signed');
-  document.getElementById('techSigPlaceholder').style.display = 'block';
-}
-
-function undoTechSignature() {
-  if (techSignatureStrokes.length === 0) return;
-  techSignatureStrokes.pop();
-  if (techSignatureStrokes.length === 0) { techHasSigned = false; document.getElementById('techSignatureCanvas').classList.remove('signed'); document.getElementById('techSigPlaceholder').style.display = 'block'; }
-  redrawTechSignature();
-}
-
-// ===== SUBMIT =====
-function submitMaintenance() {
-  const techName = document.getElementById('techName').value.trim();
-  const userName = document.getElementById('userName').value.trim();
-  const userFichaVal = document.getElementById('userFicha').value.trim();
-  const status = document.getElementById('maintStatus').value;
-  const obs = document.getElementById('observations')?.value?.trim() || '';
-
-  // Validations
-  if (!techName) { showToast('⚠️ Ingrese el nombre del técnico'); document.getElementById('techName').focus(); return; }
-  if (!APP.currentEquipment) { showToast('⚠️ Primero busque un equipo'); return; }
-  if (!userName) { showToast('⚠️ Ingrese el nombre del usuario'); document.getElementById('userName').focus(); return; }
-  if (!status) { showToast('⚠️ Seleccione el estado del mantenimiento'); return; }
-  if (!APP.hasSigned) { showToast('⚠️ Se requiere la firma del usuario'); return; }
-
-  // Build the updated equipment with current field values
-  const updatedEquipment = { ...APP.currentEquipment };
-  document.querySelectorAll('.field-input[data-key]').forEach(input => {
-    updatedEquipment[input.dataset.key] = input.value;
-  });
-
-  const record = {
-    timestamp: new Date().toISOString(),
-    startTime: APP.startTime || new Date().toISOString(),
-    technician: techName,
-    code: findFieldValue(APP.currentEquipment, 'CÓDIGO INVENTARIO'),
-    equipment: updatedEquipment,
-    changes: [...APP.changes],
-    userName,
-    userFicha: document.getElementById('userFicha').value.trim(),
-    userCargo: document.getElementById('userCargo').value.trim(),
-    photos: { ...APP_PHOTOS },
-    status,
-    observations: obs,
-    survey: { ...APP_SURVEY },
-    signature: document.getElementById('signatureCanvas').toDataURL('image/png'),
-    techSignature: document.getElementById('techSignatureCanvas').toDataURL('image/png')
-  };
-
-  APP.history.unshift(record);
-  localStorage.setItem('sedapal_maint_history_' + new Date().toISOString().slice(0, 10), JSON.stringify(APP.history));
-
-  // Send to Google Sheets if webhook configured
-  sendToGoogleSheets(record);
-
-  renderHistory();
-
-  const code = record.code;
-  document.getElementById('successMessage').textContent = `Equipo ${code} registrado como "${status}" por ${userName}.`;
-  document.getElementById('successModal').classList.add('active');
-}
-
-// ===== SEND TO GOOGLE SHEETS =====
-async function sendToGoogleSheets(record) {
-  const url = APP.config.webhookUrl;
-  if (!url) { showToast('⚠️ Configure la URL del Web App en ⚙️ Config'); return; }
-
-  // Build flat row with all fields
-  const eq = record.equipment;
-  const COLS = FIELD_GROUPS.flatMap(g => g.fields.map(f => f.key));
-
-  const payload = {
-    FECHA: new Date(record.timestamp).toLocaleString('es-PE'),
-    'TÉCNICO': record.technician,
-    'CÓDIGO_INVENTARIO': record.code,
-  };
-
-  // Add all equipment fields
-  COLS.forEach(key => {
-    const clean = key.replace(/ /g, '_');
-    payload[clean] = findFieldValue(eq, key) || '';
-  });
-
-  // Add maintenance info
-  payload.CAMBIOS_REALIZADOS = record.changes.map(c => `${c.field}: ${c.original} → ${c.updated}`).join(' | ') || 'Sin cambios';
-  payload.USUARIO_CONFORMIDAD = record.userName;
-  payload.FICHA_CONFORMIDAD = record.userFicha;
-  payload.CARGO_USUARIO = record.userCargo;
-  payload.ESTADO_CONFORMIDAD = record.status;
-  payload.OBSERVACIONES = record.observations || '';
-  payload.TIENE_FIRMA = 'SÍ';
-
-  // Add photos as base64 (will be saved to Drive by Apps Script)
-  payload.FOTO_EQUIPO = record.photos[1] || '';
-  payload.FOTO_CODIGO = record.photos[2] || '';
-  payload.FOTO_CAMBIO = record.photos[3] || '';
-
-  // Serial validation status
-  payload.VALIDACION_SERIES = SERIAL_FIELDS.map(sf => {
-    const st = serialValidation[sf.key];
-    return st ? `${sf.label}: ${st === 'ok' ? '✅' : st === 'fail' ? '❌' : '⏳'}` : '';
-  }).filter(Boolean).join(' | ');
-
-  try {
-    // Send as JSON string via form-encoded POST
-    const payloadStr = JSON.stringify(payload);
     
-    const resp = await fetch(url, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'data=' + encodeURIComponent(payloadStr)
-    });
+    // ===== SAVE SIGNATURES TO DRIVE =====
+    var firmaTecLink = "";
+    var firmaUsrLink = "";
+    if (data["FIRMA_TECNICO"] && data["FIRMA_TECNICO"].length > 100) {
+      firmaTecLink = savePhotoToDrive(data["FIRMA_TECNICO"], "firma_tec_" + code + "_" + fecha + ".png");
+    }
+    if (data["FIRMA_USUARIO"] && data["FIRMA_USUARIO"].length > 100) {
+      firmaUsrLink = savePhotoToDrive(data["FIRMA_USUARIO"], "firma_usr_" + code + "_" + fecha + ".png");
+    }
+    data["FIRMA_TECNICO_LINK"] = firmaTecLink;
+    data["FIRMA_USUARIO_LINK"] = firmaUsrLink;
     
-    showToast('☁️ Registro enviado a Google Sheets ✅');
-  } catch(err) {
-    console.error('Error sending to Sheets:', err);
-    showToast('⚠️ No se pudo enviar a Google Sheets');
+    // ===== GENERATE PDF AND SAVE TO DRIVE =====
+    var pdfLink = "";
     try {
-      const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
-      queue.push(payload);
-      localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
-    } catch(e) {}
-  }
-}
-
-// ===== PHOTO HANDLING =====
-const APP_PHOTOS = { 1: null, 2: null, 3: null };
-const PHOTO_LABELS = { 1: '📷 EQUIPO', 2: '🏷️ CÓDIGO INV.', 3: '🔄 CAMBIO' };
-const MAX_PHOTO_SIZE = 1600; // max dimension in px
-const PHOTO_QUALITY = 0.9; // JPEG quality
-
-function takePhoto(slot) {
-  document.getElementById('photoInput' + slot).click();
-}
-
-function handlePhoto(slot, input) {
-  const file = input.files[0];
-  if (!file) return;
-
-  showToast('📷 Procesando foto...');
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const img = new Image();
-    img.onload = function() {
-      // Compress
-      const canvas = document.createElement('canvas');
-      let w = img.width, h = img.height;
-
-      if (w > MAX_PHOTO_SIZE || h > MAX_PHOTO_SIZE) {
-        if (w > h) { h = Math.round(h * MAX_PHOTO_SIZE / w); w = MAX_PHOTO_SIZE; }
-        else { w = Math.round(w * MAX_PHOTO_SIZE / h); h = MAX_PHOTO_SIZE; }
-      }
-
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-
-      const compressed = canvas.toDataURL('image/jpeg', PHOTO_QUALITY);
-      APP_PHOTOS[slot] = compressed;
-
-      // Show preview
-      const preview = document.getElementById('photoPreview' + slot);
-      const slotDiv = document.getElementById('photoSlot' + slot);
-      slotDiv.classList.add('has-photo');
-      slotDiv.style.position = 'relative';
-      preview.innerHTML = `<img src="${compressed}" alt="Foto ${slot}"><button class="photo-remove" onclick="event.stopPropagation();removePhoto(${slot})">✕</button>`;
-
-      // Update count
-      const count = Object.values(APP_PHOTOS).filter(Boolean).length;
-      const sizeKB = Math.round(compressed.length * 0.75 / 1024);
-      document.getElementById('photoCount').innerHTML = `✅ ${count}/3 fotos — ~${sizeKB}KB esta foto`;
-      showToast(`✅ Foto ${PHOTO_LABELS[slot]} capturada (${sizeKB}KB)`);
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-function removePhoto(slot) {
-  APP_PHOTOS[slot] = null;
-  const preview = document.getElementById('photoPreview' + slot);
-  const slotDiv = document.getElementById('photoSlot' + slot);
-  slotDiv.classList.remove('has-photo');
-  slotDiv.style.position = '';
-  preview.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg><div style="font-size:10px;color:#94A3B8;margin-top:4px;font-weight:600;">${PHOTO_LABELS[slot]}</div>`;
-
-  const count = Object.values(APP_PHOTOS).filter(Boolean).length;
-  document.getElementById('photoCount').textContent = count > 0 ? `✅ ${count}/3 fotos` : 'Toca para tomar foto con la cámara — Opcional';
-}
-
-function resetPhotos() {
-  [1, 2, 3].forEach(s => removePhoto(s));
-}
-
-// ===== SEARCH BY FICHA =====
-function searchByFicha(ficha) {
-  // CONFORMIDAD ONLY - does NOT touch equipment fields
-  const resultDiv = document.getElementById('fichaResult');
-  
-  if (!ficha || ficha.length < 3 || !APP.csvData) {
-    resultDiv.style.display = 'none';
-    return;
-  }
-
-  // Search for exact or partial ficha match
-  const matches = APP.csvData.filter(row => {
-    const f = findFieldValue(row, 'FICHA USUARIO') || '';
-    return f === ficha || f.includes(ficha);
-  });
-
-  if (matches.length === 0) {
-    resultDiv.style.display = 'block';
-    resultDiv.style.background = '#FEF2F2';
-    resultDiv.style.border = '1px solid #FECACA';
-    resultDiv.innerHTML = '<span style="color:#991B1B;">❌ No se encontró la ficha ' + ficha + '</span>';
-    return;
-  }
-
-  // If exact match found
-  const exact = matches.find(row => (findFieldValue(row, 'FICHA USUARIO') || '') === ficha);
-  
-  if (exact) {
-    const name = findFieldValue(exact, 'USUARIO ASIGNADO') || '';
-    const cargo = findFieldValue(exact, 'CARGO') || '';
+      pdfLink = generateAndSavePDF(data, code, fecha);
+    } catch(pdfErr) {
+      pdfLink = "Error PDF: " + pdfErr.toString();
+    }
+    data["PDF_RMP_LINK"] = pdfLink;
     
-    // ONLY update conformity fields (by ID, not by data-key)
-    document.getElementById('userName').value = name;
-    document.getElementById('userCargo').value = cargo;
-    document.getElementById('nameAutoTag').style.display = 'inline';
-    document.getElementById('cargoAutoTag').style.display = 'inline';
+    // ===== BUILD ROW =====
+    var row = COLUMNS.map(function(col) {
+      return data[col] || "";
+    });
     
-    // Show success
-    resultDiv.style.display = 'block';
-    resultDiv.style.background = '#ECFDF5';
-    resultDiv.style.border = '1px solid #A7F3D0';
-    resultDiv.innerHTML = '<span style="color:#065F46;">✅ <strong>' + name + '</strong> — ' + cargo + '</span>';
-  } else if (matches.length <= 5) {
-    // Show partial matches
-    resultDiv.style.display = 'block';
-    resultDiv.style.background = '#FFFBEB';
-    resultDiv.style.border = '1px solid #FDE68A';
-    resultDiv.innerHTML = matches.map(row => {
-      const f = findFieldValue(row, 'FICHA USUARIO') || '';
-      const n = findFieldValue(row, 'USUARIO ASIGNADO') || '';
-      const c = findFieldValue(row, 'CARGO') || '';
-      return `<div onclick="document.getElementById('userFicha').value='${f}';searchByFicha('${f}');" style="padding:4px 0;cursor:pointer;color:#92400E;"><strong>${f}</strong> — ${n} (${c})</div>`;
-    }).join('');
-  }
-}
-
-function autocompleteFichaEquipo(ficha) {
-  const resultDiv = document.getElementById('fichaEquipoResult');
-  if (!resultDiv) return;
-  
-  if (!ficha || ficha.length < 3 || !APP.csvData) {
-    resultDiv.style.display = 'none';
-    return;
-  }
-
-  // Find user by ficha in CSV
-  const match = APP.csvData.find(row => (findFieldValue(row, 'FICHA USUARIO') || '') === ficha);
-  
-  if (match) {
-    const name = findFieldValue(match, 'USUARIO ASIGNADO') || '';
-    const cargo = findFieldValue(match, 'CARGO') || '';
-    const tipo = findFieldValue(match, 'TIPO ASIGNACIÓN') || '';
-    const gerencia = findFieldValue(match, 'GERENCIA') || '';
-    const equipoFunc = findFieldValue(match, 'EQUIPO FUNCIONAL') || '';
-    const grupoFunc = findFieldValue(match, 'GRUPO FUNCIONAL') || '';
+    sheet.appendRow(row);
+    var lastRow = sheet.getLastRow();
+    var newRange = sheet.getRange(lastRow, 1, 1, COLUMNS.length);
     
-    resultDiv.style.display = 'block';
-    resultDiv.style.background = '#ECFDF5';
-    resultDiv.style.border = '1px solid #A7F3D0';
-    resultDiv.innerHTML = '✅ <strong>' + name + '</strong> — ' + cargo;
+    // Format
+    newRange.setFontColor("#1E293B");
+    newRange.setFontWeight("normal");
+    newRange.setFontSize(10);
+    newRange.setWrap(false);
+    newRange.setVerticalAlignment("middle");
     
-    // Update user fields + organization fields
-    const fieldsMap = { 
-      'USUARIO ASIGNADO': name, 
-      'CARGO': cargo, 
-      'TIPO ASIGNACIÓN': tipo,
-      'GERENCIA': gerencia,
-      'EQUIPO FUNCIONAL': equipoFunc,
-      'GRUPO FUNCIONAL': grupoFunc
-    };
-    Object.entries(fieldsMap).forEach(([key, val]) => {
-      const input = document.querySelector('.field-input[data-key="' + key + '"]');
-      if (input && input.value !== val) {
-        input.value = val;
-        trackChange(input);
-        input.style.background = '#FFFBEB';
-        input.style.borderColor = '#F59E0B';
+    if (lastRow % 2 === 0) {
+      newRange.setBackground("#F0F4F8");
+    } else {
+      newRange.setBackground("#FFFFFF");
+    }
+    
+    sheet.getRange(lastRow, 1).setFontWeight("bold");
+    sheet.getRange(lastRow, 3).setFontWeight("bold").setFontColor("#0057A8");
+    
+    // Status color
+    var estadoCol = COLUMNS.indexOf("ESTADO_CONFORMIDAD") + 1;
+    var estadoVal = (data["ESTADO_CONFORMIDAD"] || "").toLowerCase();
+    if (estadoVal.indexOf("no conforme") >= 0) {
+      sheet.getRange(lastRow, estadoCol).setBackground("#FEF2F2").setFontColor("#991B1B");
+    } else if (estadoVal.indexOf("conforme") >= 0) {
+      sheet.getRange(lastRow, estadoCol).setBackground("#ECFDF5").setFontColor("#065F46");
+    }
+    
+    // Make links clickable (photos + firmas + PDF)
+    var linkCols = ["FOTO_EQUIPO","FOTO_CODIGO","FOTO_CAMBIO","FIRMA_TECNICO_LINK","FIRMA_USUARIO_LINK","PDF_RMP_LINK"];
+    linkCols.forEach(function(colName) {
+      var colIdx = COLUMNS.indexOf(colName) + 1;
+      if (colIdx > 0) {
+        var val = sheet.getRange(lastRow, colIdx).getValue();
+        if (val && val.toString().indexOf("http") === 0) {
+          sheet.getRange(lastRow, colIdx).setFontColor("#0057A8");
+        }
       }
     });
     
-    // Track ficha change
-    const fichaInput = document.querySelector('.field-input[data-key="FICHA USUARIO"]');
-    if (fichaInput) trackChange(fichaInput);
-    
-    showToast('👤 Usuario y organización actualizados: ' + name.split(',')[0]);
-  } else {
-    resultDiv.style.display = 'block';
-    resultDiv.style.background = '#FFFBEB';
-    resultDiv.style.border = '1px solid #FDE68A';
-    resultDiv.innerHTML = '🔍 Buscando ficha ' + ficha + '...';
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: "ok", row: lastRow, pdfLink: pdfLink }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: "error", message: error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-function updateEquipmentUser(newUserRow) {
-  const fieldsToUpdate = ['FICHA USUARIO', 'USUARIO ASIGNADO', 'CARGO', 'TIPO ASIGNACIÓN'];
-  let updated = 0;
+// ============================================================
+// GENERATE PDF AND SAVE TO DRIVE
+// ============================================================
+function generateAndSavePDF(data, code, fecha) {
+  var doc = DocumentApp.create("RMP_" + code + "_temp");
+  var body = doc.getBody();
+  body.setMarginTop(20);
+  body.setMarginBottom(20);
+  body.setMarginLeft(30);
+  body.setMarginRight(30);
   
-  fieldsToUpdate.forEach(key => {
-    const newVal = findFieldValue(newUserRow, key) || '';
-    const input = document.querySelector('.field-input[data-key="' + key + '"]');
-    if (input) {
-      const oldVal = input.value;
-      if (oldVal !== newVal) {
-        input.value = newVal;
-        trackChange(input);
-        input.style.background = '#FFFBEB';
-        input.style.borderColor = '#F59E0B';
-        updated++;
+  var BLU = "#0077B6";
+  var BLU2 = "#005F8A";
+  var GRAY = "#5A6C7D";
+  var DARK = "#1E293B";
+  var ORANGE = "#9A3412";
+  
+  // ===== TITLE =====
+  var title = body.appendParagraph("REPORTE DE MANTENIMIENTO PREVENTIVO — RMP");
+  title.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  title.setFontSize(14);
+  title.setBold(true);
+  title.setForegroundColor(BLU2);
+  
+  // Subtitle
+  var sub = body.appendParagraph(
+    "SEDAPAL ETIC  |  RMP-" + code + "  |  " + (data["FECHA"] || "") + "  |  Técnico: " + (data["TÉCNICO"] || "")
+  );
+  sub.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  sub.setFontSize(8);
+  sub.setForegroundColor(GRAY);
+  
+  // Timing
+  var timing = body.appendParagraph(
+    "Inicio: " + (data["HORA_INICIO"] || "") + "  |  Fin: " + (data["HORA_FIN"] || "") + "  |  Duración: " + (data["DURACION"] || "")
+  );
+  timing.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  timing.setFontSize(7);
+  timing.setForegroundColor(ORANGE);
+  
+  body.appendParagraph("").setSpacingAfter(5);
+  
+  // ===== HELPER FUNCTIONS =====
+  function addSection(num, title) {
+    var p = body.appendParagraph(num + "  " + title);
+    p.setFontSize(9);
+    p.setBold(true);
+    p.setForegroundColor(BLU);
+    p.setSpacingBefore(8);
+    p.setSpacingAfter(4);
+  }
+  
+  function addTable(rows) {
+    var table = body.appendTable(rows);
+    table.setBorderColor("#D0DCE8");
+    table.setBorderWidth(0.5);
+    for (var r = 0; r < table.getNumRows(); r++) {
+      var row = table.getRow(r);
+      for (var c = 0; c < row.getNumCells(); c++) {
+        var cell = row.getCell(c);
+        cell.setPaddingTop(2);
+        cell.setPaddingBottom(2);
+        cell.setPaddingLeft(4);
+        cell.setPaddingRight(4);
+        
+        var text = cell.getText();
+        var para = cell.getChild(0).asParagraph();
+        
+        // Labels (UPPERCASE) in gray, values in dark
+        if (text === text.toUpperCase() && text.length > 1 && !/^\d/.test(text)) {
+          para.setFontSize(6);
+          para.setForegroundColor(GRAY);
+          cell.setBackgroundColor("#F8FAFC");
+        } else {
+          para.setFontSize(8);
+          para.setForegroundColor(DARK);
+          para.setBold(true);
+        }
       }
     }
-  });
-  
-  if (updated > 0) {
-    const name = findFieldValue(newUserRow, 'USUARIO ASIGNADO') || '';
-    showToast('👤 Datos del equipo actualizados con info de ' + name.split(',')[0]);
-  }
-}
-
-function resetForm() {
-  APP.currentEquipment = null;
-  APP.originalData = null;
-  APP.changes = [];
-  APP.startTime = null;
-  document.getElementById('equipCode').value = '';
-  document.getElementById('serialInput').value = '';
-  document.getElementById('serialResult').innerHTML = '';
-  document.getElementById('userName').value = '';
-  document.getElementById('userFicha').value = '';
-  document.getElementById('userCargo').value = '';
-  document.getElementById('nameAutoTag').style.display = 'none';
-  document.getElementById('cargoAutoTag').style.display = 'none';
-  document.getElementById('fichaResult').style.display = 'none';
-  resetPhotos();
-  document.getElementById('maintStatus').value = '';
-  document.getElementById('observations').value = '';
-  document.getElementById('obsGroup').style.display = 'none';
-  document.getElementById('equipmentSection').style.display = 'none';
-  clearSignature();
-  clearTechSignature();
-  APP_SURVEY.trato = 0;
-  APP_SURVEY.conformidad = 0;
-  ['surveyTratoGroup','surveyConformidadGroup'].forEach(id => {
-    document.getElementById(id)?.querySelectorAll('button').forEach(btn => {
-      btn.style.background = '#FFF'; btn.style.color = '#000'; btn.style.borderColor = '#CBD5E1';
-    });
-  });
-  document.getElementById('equipCode').focus();
-}
-
-// ===== HISTORY =====
-function renderHistory() {
-  const list = document.getElementById('historyList');
-  const count = document.getElementById('historyCount');
-  count.textContent = APP.history.length;
-
-  if (APP.history.length === 0) {
-    list.innerHTML = `<div class="empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><h3>Sin registros aún</h3><p>Los equipos procesados aparecerán aquí</p></div>`;
-    return;
-  }
-
-  list.innerHTML = APP.history.map(h => {
-    const time = new Date(h.timestamp).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
-    const hasMods = h.changes && h.changes.length > 0;
-    return `
-      <div class="history-item">
-        <div class="status-dot ${hasMods ? 'mod' : 'ok'}"></div>
-        <div>
-          <div class="code">${h.code}</div>
-          <div style="font-size:11px;color:var(--text-muted);">${h.status} — ${h.userName}</div>
-        </div>
-        <div class="time">${time}</div>
-      </div>
-    `;
-  }).join('');
-}
-
-// ===== EXPORT =====
-function exportRecord() {
-  if (APP.history.length === 0) return;
-  const last = APP.history[0];
-  
-  if (!window.jspdf) {
-    showToast('⏳ Cargando generador de PDF...');
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js';
-    s.onload = () => exportRecord();
-    s.onerror = () => { showToast('⚠️ No se pudo cargar jsPDF.'); };
-    document.head.appendChild(s);
-    return;
+    return table;
   }
   
-  const eq = last.equipment;
-  let JC; try { JC = window.jspdf.jsPDF; } catch(e) { try { JC = window.jsPDF; } catch(e2) {} }
-  if (!JC) { alert('jsPDF no disponible'); return; }
+  // ===== 1. INFORMACIÓN DEL USUARIO =====
+  addSection("1", "Información del usuario y área");
+  addTable([
+    ["USUARIO", data["USUARIO_ASIGNADO"] || "", "FICHA", data["FICHA_USUARIO"] || ""],
+    ["CARGO", data["CARGO"] || "", "TIPO DE ASIGNACIÓN", data["TIPO_ASIGNACIÓN"] || ""],
+    ["USUARIO OTRO", "", "GERENCIA", data["GERENCIA"] || ""],
+    ["SEDE O LOCAL", data["SEDE"] || "", "EQUIPO FUNCIONAL", data["EQUIPO_FUNCIONAL"] || ""],
+    ["REFERENCIA", data["REFERENCIA_UBICACIÓN"] || "", "GRUPO FUNCIONAL", data["GRUPO_FUNCIONAL"] || ""]
+  ]);
   
-  try {
-  const doc = new JC('p', 'mm', 'a4');
-  const W = 210, H = 297, ML = 14, MR = 14, CW = W - ML - MR;
-  let y = 0;
-  const gv = k => findFieldValue(eq, k) || '';
-  const cat = gv('CATEGORÍA').toUpperCase();
-  const isPC = /PC|LAPTOP|WORKSTATION|WS/.test(cat);
-  const isImp = /IMPRESORA|PLOTTER/.test(cat);
-  const isEsc = /SCANNER|ESCANER/.test(cat);
-  const isTab = /TABLET/.test(cat);
-  const isMon = /MONITOR/.test(cat);
-
-  // Colors (RGB 0-255)
-  const BLU = [0,119,182], BLU2 = [0,95,138], CYAN = [0,180,216];
-  const CELL_BG = [248,250,252], CELL_BD = [208,220,232];
-  const PERI_BG = [235,245,255];
-  const SEC_BG = [0,119,182];
-  const LBL = [90,108,125], VAL = [30,41,59], ORG = [154,52,18];
-  const WHITE = [255,255,255], SURV_BG = [255,247,237], SURV_BD = [254,215,170];
-  const FIRMA_HD = [232,244,253], FIRMA_BD = [208,220,232];
-  const CHK_BD = [148,163,184], CHK_GREEN = [16,137,62];
-
-  const sF = (c) => doc.setFillColor(c[0],c[1],c[2]);
-  const sT = (c) => doc.setTextColor(c[0],c[1],c[2]);
-  const sD = (c) => doc.setDrawColor(c[0],c[1],c[2]);
-  const fn = (s,sz) => { doc.setFont('helvetica',s); doc.setFontSize(sz); };
-
-  // roundedRect with fill+stroke
-  function rr(x,y,w,h,r,fill,stroke) {
-    if (fill) { sF(fill); doc.roundedRect(x,y,w,h,r,r,'F'); }
-    if (stroke) { sD(stroke); doc.setLineWidth(0.3); doc.roundedRect(x,y,w,h,r,r,'S'); }
-  }
-  // Cell: rounded rect with label on top + value below
-  function cell(x,y,w,h,label,value,bg,bd) {
-    rr(x,y,w,h,1.5, bg||CELL_BG, bd||CELL_BD);
-    fn('normal',4.5); sT(LBL);
-    doc.text(label, x+3, y+3.5);
-    fn('normal',6.5); sT(VAL);
-    doc.text(String(value||'').substring(0,Math.floor(w/2)), x+3, y+h-1.5);
-  }
-
-  // ===== TOP BAR =====
-  sF(BLU); doc.rect(0,0,W,2,'F');
-  sF(CYAN); doc.rect(ML,5.5,CW,0.6,'F');
-
-  // ===== HEADER AREA (light blue bg) =====
-  rr(ML,6,CW,15,2,[240,247,255],null);
-  y = 10;
-  fn('bold',13); sT(BLU2);
-  doc.text('REPORTE DE MANTENIMIENTO PREVENTIVO \u2014 RMP', W/2, y, {align:'center'});
-  y += 6;
-  fn('normal',6.5); sT(LBL);
-  const rmpCode = gv('CÓDIGO INVENTARIO') || last.code;
-  doc.text('SEDAPAL ETIC  |  RMP-'+rmpCode+'  |  '+new Date(last.timestamp).toLocaleDateString('es-PE')+'  |  T\u00e9cnico: '+(last.technician||''), W/2, y, {align:'center'});
-  
-  // Timing bar (orange bg)
-  y += 3;
-  rr(ML,y,CW,5,1.5, SURV_BG, SURV_BD);
-  fn('normal',6); sT(ORG);
-  const st = last.startTime ? new Date(last.startTime) : new Date(last.timestamp);
-  const et = new Date(last.timestamp);
-  const dm = Math.round((et-st)/60000);
-  const ds = dm>=60 ? Math.floor(dm/60)+'h '+dm%60+'min' : dm+'min';
-  doc.text('Inicio: '+st.toLocaleString('es-PE')+'   |   Fin: '+et.toLocaleString('es-PE')+'   |   Duraci\u00f3n total: '+ds, W/2, y+3.5, {align:'center'});
-  y += 7;
-
-  // ===== SECTION HEADER =====
-  function secHdr(num, title) {
-    y += 2;
-    rr(ML, y, CW, 5.5, 1.5, SEC_BG, null);
-    // White circle for number
-    rr(ML+1.5, y+0.5, 5, 4.5, 2, WHITE, null);
-    fn('bold',7); sT(BLU2); doc.text(String(num), ML+4, y+3.7, {align:'center'});
-    fn('bold',7); sT(WHITE); doc.text(title, ML+9, y+3.8);
-    y += 7;
-  }
-
-  // ===== 1. INFORMACIÓN =====
-  secHdr('1','Informaci\u00f3n del usuario y \u00e1rea');
-  const hw = CW/2 - 1.5;
-  cell(ML, y, hw, 9, 'USUARIO', gv('USUARIO ASIGNADO')); cell(ML+hw+3, y, hw, 9, 'FICHA', gv('FICHA USUARIO')); y+=10;
-  cell(ML, y, hw, 9, 'CARGO', gv('CARGO')); cell(ML+hw+3, y, hw, 9, 'TIPO DE ASIGNACI\u00d3N', gv('TIPO ASIGNACIÓN')); y+=10;
-  cell(ML, y, hw, 9, 'USUARIO OTRO', ''); cell(ML+hw+3, y, hw, 9, 'GERENCIA', gv('GERENCIA')); y+=10;
-  cell(ML, y, hw, 9, 'SEDE O LOCAL', gv('SEDE')); cell(ML+hw+3, y, hw, 9, 'EQUIPO FUNCIONAL', gv('EQUIPO FUNCIONAL')); y+=10;
-  cell(ML, y, hw, 9, 'REFERENCIA', gv('REFERENCIA UBICACIÓN')); cell(ML+hw+3, y, hw, 9, 'GRUPO FUNCIONAL', gv('GRUPO FUNCIONAL')); y+=10;
-
   // ===== 2. INVENTARIO =====
-  secHdr('2','Inventario del equipo asignado al usuario');
-  const qw = CW/4-1;
-  cell(ML, y, qw, 9, 'C. INVENTARIO', gv('CÓDIGO INVENTARIO')); cell(ML+qw+1.3, y, qw, 9, 'CONDICI\u00d3N', ''); cell(ML+(qw+1.3)*2, y, qw, 9, 'ESTADO', ''); cell(ML+(qw+1.3)*3, y, qw, 9, 'EN USO / SIN USO', 'En uso'); y+=10;
-  const fw = CW/5-0.8;
-  cell(ML, y, fw, 9, 'CATEGOR\u00cdA', gv('CATEGORÍA')); cell(ML+(fw+1)*1, y, fw, 9, 'TIPO', gv('TIPO DE EQUIPO')); cell(ML+(fw+1)*2, y, fw, 9, 'MARCA', gv('MARCA')); cell(ML+(fw+1)*3, y, fw, 9, 'MODELO', gv('MODELO')); cell(ML+(fw+1)*4, y, fw, 9, 'SERIE', gv('SERIE EQUIPO')); y+=10;
-
-  // Periféricos header
-  rr(ML, y, CW, 4, 1, PERI_BG, CELL_BD);
-  fn('bold',6); sT(BLU2); doc.text('Perif\u00e9ricos', ML+3, y+2.8); y+=5;
-
-  function periRow(name, cols) {
-    const nw = 17;
-    rr(ML, y, nw, 9, 1, PERI_BG, CELL_BD);
-    fn('bold',6); sT(BLU2); doc.text(name, ML+2, y+5);
-    const pw = (CW-nw-3)/cols.length;
-    cols.forEach((c,i) => {
-      cell(ML+nw+1.5+pw*i, y, pw-0.5, 9, c[0], c[1]);
-    });
-    y+=10;
-  }
-  periRow('Monitor',[['MARCA',gv('MARCA MONITOR 1')],['MODELO',gv('MODELO MONITOR 1')],['SERIE',gv('SERIE MONITOR 1')],['TAMA\u00d1O',gv('PULGADAS MONITOR 1')]]);
-  periRow('Teclado',[['MARCA',gv('MARCA TECLADO')],['SERIE',gv('SERIE TECLADO')]]);
-  periRow('Mouse',[['MARCA',gv('MARCA MOUSE')],['SERIE',gv('SERIE MOUSE')]]);
-
+  addSection("2", "Inventario del equipo asignado al usuario");
+  addTable([
+    ["C. INVENTARIO", data["CÓDIGO_INVENTARIO"] || "", "CONDICIÓN", "", "ESTADO", "", "EN USO", "En uso"],
+    ["CATEGORÍA", data["CATEGORÍA"] || "", "TIPO", data["TIPO_DE_EQUIPO"] || "", "MARCA", data["MARCA"] || "", "MODELO", data["MODELO"] || ""]
+  ]);
+  
+  // Periféricos
+  var periP = body.appendParagraph("Periféricos");
+  periP.setFontSize(8);
+  periP.setBold(true);
+  periP.setForegroundColor(BLU2);
+  periP.setSpacingBefore(4);
+  
+  addTable([
+    ["Monitor", "MARCA", data["MARCA_MONITOR_1"] || "", "MODELO", data["MODELO_MONITOR_1"] || "", "SERIE", data["SERIE_MONITOR_1"] || ""],
+    ["Teclado", "MARCA", data["MARCA_TECLADO"] || "", "SERIE", data["SERIE_TECLADO"] || "", "", ""],
+    ["Mouse", "MARCA", data["MARCA_MOUSE"] || "", "SERIE", data["SERIE_MOUSE"] || "", "", ""]
+  ]);
+  
   // ===== 3. DATOS ADICIONALES =====
-  secHdr('3','Datos adicionales del Equipo');
-  cell(ML, y, qw, 9, 'UND. \u00d3PTICA', ''); cell(ML+qw+1.3, y, qw, 9, 'PROCESADOR', gv('PROCESADOR')); cell(ML+(qw+1.3)*2, y, qw, 9, 'MEMORIA RAM', gv('MEMORIA RAM')); cell(ML+(qw+1.3)*3, y, qw, 9, 'DISCO DURO', gv('ALMACENAMIENTO')); y+=10;
-  const tw = CW/3-1;
-  cell(ML, y, tw, 9, 'DIRECCI\u00d3N IP', gv('DIRECCIÓN IP')); cell(ML+tw+1.5, y, tw, 9, 'HOSTNAME', gv('NOMBRE HOST')); cell(ML+(tw+1.5)*2, y, tw, 9, 'SISTEMA OPERATIVO', ''); y+=10;
-
+  addSection("3", "Datos adicionales del Equipo");
+  addTable([
+    ["UND. ÓPTICA", "", "PROCESADOR", data["PROCESADOR"] || "", "MEMORIA RAM", data["MEMORIA_RAM"] || "", "DISCO DURO", data["ALMACENAMIENTO"] || ""],
+    ["DIRECCIÓN IP", data["DIRECCIÓN_IP"] || "", "HOSTNAME", data["NOMBRE_HOST"] || "", "SISTEMA OPERATIVO", "", "", ""]
+  ]);
+  
   // ===== 4. CHECKLIST =====
-  secHdr('4','Actividades de Mantenimiento realizados (Check list)');
-  const cats = [
-    {t:'PC / WS / LAPTOP', items:['Diagn\u00f3stico previo estado equipo','Validaci\u00f3n Software NO AUTORIZADO','Limpieza componentes Externos','Validaci\u00f3n Antivirus WithSecure','Validaci\u00f3n Agente Discovery','Prueba de Operatividad'], active:isPC},
-    {t:'MONITOR', items:['Diagn\u00f3stico previo estado equipo','Limpieza externa del equipo','Pruebas de Operatividad'], active:isPC||isMon},
-    {t:'IMPRESORA / PLOTTER', items:['Diagn\u00f3stico previo estado equipo','Identif. estado consumibles','Limpieza componentes internos','Lubricaci\u00f3n partes mec\u00e1nicas','Limpieza externa de equipo','Pruebas de Operatividad'], active:isImp},
-    {t:'SCANNER', items:['Diagn\u00f3stico previo estado equipo','Limpieza interna partes mec\u00e1n.','Limpieza externa de equipo','Pruebas de Operatividad'], active:isEsc}
+  addSection("4", "Actividades de Mantenimiento realizados (Check list)");
+  var cat = (data["CATEGORÍA"] || "").toUpperCase();
+  var isPC = /PC|LAPTOP|WORKSTATION|WS/.test(cat);
+  var isImp = /IMPRESORA|PLOTTER/.test(cat);
+  var isEsc = /SCANNER|ESCANER/.test(cat);
+  var isTab = /TABLET/.test(cat);
+  var isMon = /MONITOR/.test(cat);
+  var check = "✓";
+  var noCheck = "○";
+  
+  var chkRows = [
+    ["PC / WS / LAPTOP", "", "MONITOR", "", "IMPRESORA / PLOTTER", "", "SCANNER", ""],
+    ["Diagnóstico previo", isPC?check:noCheck, "Diagnóstico previo", (isPC||isMon)?check:noCheck, "Diagnóstico previo", isImp?check:noCheck, "Diagnóstico previo", isEsc?check:noCheck],
+    ["Valid. SW NO AUTORIZ.", isPC?check:noCheck, "Limpieza externa", (isPC||isMon)?check:noCheck, "Estado consumibles", isImp?check:noCheck, "Limp. interna mecán.", isEsc?check:noCheck],
+    ["Limpieza ext.", isPC?check:noCheck, "Pruebas Operativ.", (isPC||isMon)?check:noCheck, "Limp. comp. internos", isImp?check:noCheck, "Limpieza externa", isEsc?check:noCheck],
+    ["Valid. Antivirus", isPC?check:noCheck, "", "", "Lubric. partes mec.", isImp?check:noCheck, "Pruebas Operativ.", isEsc?check:noCheck],
+    ["Valid. Discovery", isPC?check:noCheck, "", "", "Limpieza externa", isImp?check:noCheck, "", ""],
+    ["Prueba Operativ.", isPC?check:noCheck, "", "", "Pruebas Operativ.", isImp?check:noCheck, "", ""]
   ];
-
-  const ccw = CW/4-1;
-  const chkY = y;
-  cats.forEach((cat,ci) => {
-    const cx = ML + (ccw+1.3)*ci;
-    // Column header
-    rr(cx, y, ccw, 4.5, 1, PERI_BG, CELL_BD);
-    fn('bold',5.5); sT(BLU2); doc.text(cat.t, cx+3, y+3.2);
-    let iy = y + 5.5;
-    cat.items.forEach(item => {
-      // Checkbox row bg
-      rr(cx, iy-1, ccw, 4.3, 0.5, CELL_BG, null);
-      // Checkbox
-      rr(cx+1, iy-0.3, 2.8, 2.8, 0.8, WHITE, CHK_BD);
-      if (cat.active) {
-        sF(CHK_GREEN); doc.roundedRect(cx+1.2, iy-0.1, 2.4, 2.4, 0.6, 0.6, 'F');
-        fn('bold',5); sT(WHITE); doc.text('\u2713', cx+1.5, iy+1.8);
-      }
-      fn('normal',4.8); sT(VAL); doc.text(item, cx+5, iy+1.5);
-      iy += 4.3;
-    });
-  });
-  y += 5 + 6*4.3;
-
-  // TABLET (below scanner column)
-  const tabX = ML + (ccw+1.3)*3;
-  rr(tabX, y, ccw, 4.5, 1, PERI_BG, CELL_BD);
-  fn('bold',5.5); sT(BLU2); doc.text('TABLET', tabX+3, y+3.2);
-  let tiy = y + 5.5;
-  ['Diagn\u00f3stico previo estado equipo','Limpieza de case externo','Pruebas de Operatividad'].forEach(item => {
-    rr(tabX, tiy-1, ccw, 4.3, 0.5, CELL_BG, null);
-    rr(tabX+1, tiy-0.3, 2.8, 2.8, 0.8, WHITE, CHK_BD);
-    if (isTab) { sF(CHK_GREEN); doc.roundedRect(tabX+1.2, tiy-0.1, 2.4, 2.4, 0.6, 0.6, 'F'); fn('bold',5); sT(WHITE); doc.text('\u2713', tabX+1.5, tiy+1.8); }
-    fn('normal',4.8); sT(VAL); doc.text(item, tabX+5, tiy+1.5);
-    tiy += 4.3;
-  });
-  y = Math.max(y + 3*4.3 + 3, tiy + 1);
-
-  // ===== 5. OBSERVACIONES =====
-  secHdr('5','Observaciones de M. Preventivo');
-  rr(ML, y, CW, 12, 1.5, WHITE, CELL_BD);
-  const obsText = last.changes.length > 0 
-    ? last.changes.map(c => c.field+': '+c.original+' \u2192 '+c.updated).join(' | ')
-    : (last.observations || '');
-  fn('normal',6); sT(VAL);
-  const obsL = doc.splitTextToSize(obsText, CW-8);
-  doc.text(obsL.slice(0,3), ML+4, y+5);
-  y += 14;
-
-  // Separator
-  sD([232,237,242]); doc.setLineWidth(0.2);
-  doc.line(ML+3, y, ML+CW-3, y); y+=1;
-
-  // ===== 6. ENCUESTA =====
-  secHdr('6','Encuesta de Calidad de servicio');
-  // Legend bar
-  rr(ML, y, CW, 4, 1, SURV_BG, SURV_BD);
-  fn('normal',5.5); sT(ORG);
-  doc.text('1=Muy Malo  |  2=Malo  |  3=Regular  |  4=Bueno  |  5=Muy Bueno', W/2, y+2.8, {align:'center'});
-  y += 5.5;
-
-  const sv = last.survey || {trato:0, conformidad:0};
-  function survRow(label, val) {
-    rr(ML, y, CW, 5.5, 1, CELL_BG, CELL_BD);
-    fn('normal',6.5); sT(VAL);
-    doc.text(label+':', ML+3, y+3.8);
-    for (let n=1; n<=5; n++) {
-      const bx = ML+CW-58+(n-1)*10;
-      if (n===val) {
-        rr(bx, y+0.5, 4.2, 4.2, 2.1, BLU, null);
-        fn('bold',6); sT(WHITE);
-      } else {
-        rr(bx, y+0.5, 4.2, 4.2, 2.1, WHITE, BLU);
-        fn('normal',6); sT(BLU);
-      }
-      doc.text(String(n), bx+2.1, y+3.5, {align:'center'});
-    }
-    y += 6.5;
+  
+  var chkTable = addTable(chkRows);
+  // Bold headers
+  for (var c = 0; c < chkTable.getRow(0).getNumCells(); c += 2) {
+    var hCell = chkTable.getRow(0).getCell(c);
+    hCell.getChild(0).asParagraph().setBold(true);
+    hCell.getChild(0).asParagraph().setForegroundColor(BLU2);
+    hCell.getChild(0).asParagraph().setFontSize(7);
+    hCell.setBackgroundColor("#EBF5FF");
   }
-  survRow('Presentaci\u00f3n y Trato del Personal T\u00e9cnico', sv.trato);
-  survRow('Conformidad del Usuario con el mantenimiento', sv.conformidad);
-  y += 2;
-
+  
+  // TABLET section
+  if (isTab) {
+    var tabP = body.appendParagraph("TABLET: " + check + " Diagnóstico previo  " + check + " Limpieza case externo  " + check + " Pruebas Operatividad");
+    tabP.setFontSize(7);
+    tabP.setForegroundColor(DARK);
+  }
+  
+  // ===== 5. OBSERVACIONES =====
+  addSection("5", "Observaciones de M. Preventivo");
+  var obsText = data["CAMBIOS_REALIZADOS"] || data["OBSERVACIONES"] || "(Sin observaciones)";
+  var obsP = body.appendParagraph(obsText);
+  obsP.setFontSize(8);
+  obsP.setForegroundColor(DARK);
+  
+  // ===== 6. ENCUESTA =====
+  addSection("6", "Encuesta de Calidad de servicio");
+  var legend = body.appendParagraph("1=Muy Malo  |  2=Malo  |  3=Regular  |  4=Bueno  |  5=Muy Bueno");
+  legend.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  legend.setFontSize(7);
+  legend.setForegroundColor(ORANGE);
+  
+  var tratoVal = parseInt(data["ENCUESTA_TRATO"]) || 0;
+  var confVal = parseInt(data["ENCUESTA_CONFORMIDAD"]) || 0;
+  
+  function surveyLine(label, val) {
+    var marks = "";
+    for (var n = 1; n <= 5; n++) {
+      marks += (n === val) ? " [" + n + "] " : "  " + n + "  ";
+    }
+    return label + ":  " + marks;
+  }
+  
+  var s1 = body.appendParagraph(surveyLine("Presentación y Trato del Personal Técnico", tratoVal));
+  s1.setFontSize(8); s1.setForegroundColor(DARK);
+  var s2 = body.appendParagraph(surveyLine("Conformidad del Usuario con el mantenimiento", confVal));
+  s2.setFontSize(8); s2.setForegroundColor(DARK);
+  
   // ===== 7 & 8. FIRMAS =====
-  if (y > H-75) { doc.addPage(); y=15; }
-  const fww = CW/2 - 3;
-  // Técnico header
-  rr(ML, y, fww, 5, 1, FIRMA_HD, FIRMA_BD);
-  fn('bold',6.5); sT(BLU2); doc.text('7. T\u00e9cnico de Mant. Preventivo', ML+3, y+3.5);
-  // Técnico body
-  rr(ML, y+5, fww, 55, 1, WHITE, FIRMA_BD);
-  if (last.techSignature) { try {
-    doc.addImage(last.techSignature,'PNG',ML+(fww-60)/2,y+8,60,40);
-  } catch(e){} }
-  fn('normal',5); sT(LBL); doc.text('NOMBRES:', ML+3, y+52);
-  fn('bold',6.5); sT(VAL); doc.text(last.technician||'', ML+3, y+56);
-
-  // Usuario header
-  rr(ML+fww+6, y, fww, 5, 1, FIRMA_HD, FIRMA_BD);
-  fn('bold',6.5); sT(BLU2); doc.text('8. Conformidad de Usuario', ML+fww+9, y+3.5);
-  // Usuario body
-  rr(ML+fww+6, y+5, fww, 55, 1, WHITE, FIRMA_BD);
-  if (last.signature) { try {
-    doc.addImage(last.signature,'PNG',ML+fww+6+(fww-60)/2,y+8,60,40);
-  } catch(e){} }
-  fn('normal',5); sT(LBL); doc.text('NOMBRES:', ML+fww+9, y+52);
-  fn('bold',6.5); sT(VAL); doc.text(last.userName||'', ML+fww+9, y+56);
-
+  body.appendParagraph("").setSpacingAfter(5);
+  
+  var firmaTable = body.appendTable([
+    ["7. Técnico de Mant. Preventivo", "8. Conformidad de Usuario"],
+    ["", ""],
+    ["NOMBRES:\n" + (data["TÉCNICO"] || ""), "NOMBRES:\n" + (data["USUARIO_ASIGNADO"] || "")]
+  ]);
+  firmaTable.setBorderColor("#D0DCE8");
+  firmaTable.setBorderWidth(0.5);
+  
+  // Style firma headers
+  for (var fc = 0; fc < 2; fc++) {
+    var hdrCell = firmaTable.getRow(0).getCell(fc);
+    hdrCell.setBackgroundColor("#E8F4FD");
+    hdrCell.getChild(0).asParagraph().setBold(true);
+    hdrCell.getChild(0).asParagraph().setForegroundColor(BLU2);
+    hdrCell.getChild(0).asParagraph().setFontSize(8);
+    
+    // Firma image row - set height
+    var sigCell = firmaTable.getRow(1).getCell(fc);
+    sigCell.setPaddingTop(10);
+    sigCell.setPaddingBottom(10);
+    sigCell.setBackgroundColor("#FFFFFF");
+  }
+  
+  // Insert signature images if available
+  try {
+    if (data["FIRMA_TECNICO"] && data["FIRMA_TECNICO"].length > 100) {
+      var sigParts = data["FIRMA_TECNICO"].split(",");
+      var sigBytes = Utilities.base64Decode(sigParts.length > 1 ? sigParts[1] : sigParts[0]);
+      var sigBlob = Utilities.newBlob(sigBytes, "image/png", "firma_tec.png");
+      var sigCell1 = firmaTable.getRow(1).getCell(0);
+      sigCell1.clear();
+      var sigPara1 = sigCell1.appendParagraph("");
+      sigPara1.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      var img1 = sigPara1.appendInlineImage(sigBlob);
+      img1.setWidth(180);
+      img1.setHeight(80);
+    }
+  } catch(sigErr) {}
+  
+  try {
+    if (data["FIRMA_USUARIO"] && data["FIRMA_USUARIO"].length > 100) {
+      var sigParts2 = data["FIRMA_USUARIO"].split(",");
+      var sigBytes2 = Utilities.base64Decode(sigParts2.length > 1 ? sigParts2[1] : sigParts2[0]);
+      var sigBlob2 = Utilities.newBlob(sigBytes2, "image/png", "firma_usr.png");
+      var sigCell2 = firmaTable.getRow(1).getCell(1);
+      sigCell2.clear();
+      var sigPara2 = sigCell2.appendParagraph("");
+      sigPara2.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      var img2 = sigPara2.appendInlineImage(sigBlob2);
+      img2.setWidth(180);
+      img2.setHeight(80);
+    }
+  } catch(sigErr2) {}
+  
+  // Names row style
+  for (var nc = 0; nc < 2; nc++) {
+    var nameCell = firmaTable.getRow(2).getCell(nc);
+    nameCell.getChild(0).asParagraph().setFontSize(7);
+    nameCell.getChild(0).asParagraph().setForegroundColor(DARK);
+  }
+  
   // ===== FOOTER =====
-  sD(BLU); doc.setLineWidth(0.35);
-  doc.line(ML, H-8, W-MR, H-8);
-  sF(BLU); doc.rect(0,H-2,W,2,'F');
-  fn('normal',5.5); sT(LBL);
-  doc.text('Proyecto MANANTIAL \u2014 Mantenimiento Preventivo SEDAPAL ETIC \u2014 Derechos Reservados', W/2, H-4, {align:'center'});
-
-  doc.save('RMP_'+rmpCode+'_'+new Date().toISOString().slice(0,10)+'.pdf');
-  showToast('\ud83d\udcc4 RMP descargado en PDF');
-  } catch(e) { console.error('PDF Error:',e); alert('Error PDF: '+e.message); }
+  body.appendParagraph("").setSpacingAfter(10);
+  var footer = body.appendParagraph("Proyecto MANANTIAL — Mantenimiento Preventivo SEDAPAL ETIC — Derechos Reservados");
+  footer.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  footer.setFontSize(7);
+  footer.setForegroundColor(GRAY);
+  
+  // ===== CONVERT TO PDF =====
+  doc.saveAndClose();
+  
+  var docFile = DriveApp.getFileById(doc.getId());
+  var pdfBlob = docFile.getAs("application/pdf");
+  pdfBlob.setName("RMP_" + code + "_" + Utilities.formatDate(new Date(), "America/Lima", "yyyy-MM-dd") + ".pdf");
+  
+  // Get or create PDF folder with monthly subfolder
+  var pdfFolder = getOrCreateFolder(PDF_FOLDER_NAME);
+  var monthFolder = getOrCreateSubfolder(pdfFolder, Utilities.formatDate(new Date(), "America/Lima", "yyyy-MM"));
+  
+  var pdfFile = monthFolder.createFile(pdfBlob);
+  pdfFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  
+  // Delete temp doc
+  docFile.setTrashed(true);
+  
+  return pdfFile.getUrl();
 }
 
-
-// ===== UTILITIES =====
-function showLoader(show) {
-  document.getElementById('loader').classList.toggle('active', show);
+// ============================================================
+// DRIVE HELPERS
+// ============================================================
+function getOrCreateFolder(name) {
+  var folders = DriveApp.getFoldersByName(name);
+  if (folders.hasNext()) return folders.next();
+  var folder = DriveApp.createFolder(name);
+  folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return folder;
 }
 
-function showToast(msg) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2500);
+function getOrCreateSubfolder(parent, name) {
+  var folders = parent.getFoldersByName(name);
+  if (folders.hasNext()) return folders.next();
+  var folder = parent.createFolder(name);
+  folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return folder;
 }
 
-function showError(title, message) {
-  document.getElementById('errorTitle').textContent = title;
-  document.getElementById('errorMessage').textContent = message;
-  document.getElementById('errorModal').classList.add('active');
+function savePhotoToDrive(base64Data, fileName) {
+  try {
+    var folder = getOrCreateFolder(DRIVE_FOLDER_NAME);
+    
+    var parts = base64Data.split(",");
+    var contentType = "image/jpeg";
+    if (parts.length > 1) {
+      var match = parts[0].match(/data:([^;]+)/);
+      if (match) contentType = match[1];
+      base64Data = parts[1];
+    }
+    
+    var blob = Utilities.newBlob(Utilities.base64Decode(base64Data), contentType, fileName);
+    var file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    
+    return file.getUrl();
+  } catch (err) {
+    return "Error: " + err.toString();
+  }
 }
 
-function closeModal() {
-  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+// ============================================================
+// CREATE SHEET
+// ============================================================
+function createSheet(ss) {
+  var sheet = ss.insertSheet(SHEET_NAME);
+  
+  sheet.getRange(1, 1, 1, COLUMNS.length).setValues([COLUMNS]);
+  
+  var headerRange = sheet.getRange(1, 1, 1, COLUMNS.length);
+  headerRange.setBackground("#0057A8");
+  headerRange.setFontColor("#FFFFFF");
+  headerRange.setFontWeight("bold");
+  headerRange.setFontSize(9);
+  headerRange.setWrap(false);
+  sheet.setFrozenRows(1);
+  
+  var cleanRange = sheet.getRange(2, 1, 100, COLUMNS.length);
+  cleanRange.setBackground("#FFFFFF");
+  cleanRange.setFontColor("#1E293B");
+  cleanRange.setFontWeight("normal");
+  cleanRange.setFontSize(10);
+  
+  sheet.setColumnWidth(1, 170);
+  sheet.setColumnWidth(2, 180);
+  sheet.setColumnWidth(3, 150);
+  for (var i = 4; i <= COLUMNS.length; i++) {
+    sheet.setColumnWidth(i, 140);
+  }
+  sheet.setColumnWidth(41, 300);
+  sheet.setColumnWidth(45, 250);
+  sheet.setColumnWidth(47, 250);
+  
+  // Photo columns
+  sheet.setColumnWidth(COLUMNS.indexOf("FOTO_EQUIPO") + 1, 250);
+  sheet.setColumnWidth(COLUMNS.indexOf("FOTO_CODIGO") + 1, 250);
+  sheet.setColumnWidth(COLUMNS.indexOf("FOTO_CAMBIO") + 1, 250);
+  // New columns
+  sheet.setColumnWidth(COLUMNS.indexOf("PDF_RMP_LINK") + 1, 300);
+  sheet.setColumnWidth(COLUMNS.indexOf("FIRMA_TECNICO_LINK") + 1, 250);
+  sheet.setColumnWidth(COLUMNS.indexOf("FIRMA_USUARIO_LINK") + 1, 250);
+  
+  return sheet;
 }
 
-function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
-</script>
-</body>
-</html>
+function doGet(e) {
+  return ContentService
+    .createTextOutput(JSON.stringify({ 
+      status: "ok", 
+      message: "SEDAPAL Mantenimiento API v7 — con PDF automático"
+    }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
