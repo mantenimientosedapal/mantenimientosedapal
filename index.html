@@ -2891,7 +2891,7 @@ function exportRecord() {
   });
   y = Math.max(y + 3*4.3 + 3, tiy + 1);
 
-// ===== 5. OBSERVACIONES =====
+  // ===== 5. OBSERVACIONES =====
   secHdr('5','Observaciones de M. Preventivo');
   rr(ML, y, CW, 12, 1.5, WHITE, CELL_BD);
   const obsText = last.changes.length > 0 
@@ -2901,12 +2901,6 @@ function exportRecord() {
   const obsL = doc.splitTextToSize(obsText, CW-8);
   doc.text(obsL.slice(0,3), ML+4, y+5);
   y += 14;
-```
-
-**Ahora el campo mostrará:**
-```
-USUARIO ASIGNADO INICIAL: Gonzales Soto, Wilfredo Martin, Ficha: 14070
-USUARIO ASIGNADO FINAL: Guevara Chavez, Victor Aldrhing, Ficha: 12877
 
   // Separator
   sD([232,237,242]); doc.setLineWidth(0.2);
