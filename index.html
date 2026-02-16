@@ -2893,16 +2893,18 @@ function exportRecord() {
 
 // ===== 5. OBSERVACIONES =====
   secHdr('5','Observaciones de M. Preventivo');
-  const obsText = last.changes.length > 0 
-    ? last.changes.map(c => c.field+': '+c.original+' \u2192 '+c.updated).join(' | ')
+  const obsFields = ['USUARIO ASIGNADO','FICHA USUARIO'];
+  const obsChanges = last.changes.filter(c => obsFields.includes(c.field));
+  const obsText = obsChanges.length > 0 
+    ? obsChanges.map(c => c.field+': '+c.original+' \u2192 '+c.updated).join(' | ')
     : (last.observations || '');
-  fn('normal',6); sT(VAL);
-  const obsL = doc.splitTextToSize(obsText, CW-8);
-  const obsLineH = 3.5;
-  const obsPad = 4;
-  const obsBoxH = Math.max(12, obsL.length * obsLineH + obsPad * 2);
+  fn('normal',5.5); sT(VAL);
+  const obsMaxW = CW - 6;
+  const obsL = doc.splitTextToSize(obsText, obsMaxW);
+  const obsLineH = 3;
+  const obsBoxH = Math.max(10, obsL.length * obsLineH + 5);
   rr(ML, y, CW, obsBoxH, 1.5, WHITE, CELL_BD);
-  doc.text(obsL, ML+4, y+obsPad+2.5);
+  doc.text(obsL, ML+3, y+4);
   y += obsBoxH + 2;
 
   // Separator
