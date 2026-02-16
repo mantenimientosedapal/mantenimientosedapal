@@ -2893,11 +2893,17 @@ function exportRecord() {
 
 // ===== 5. OBSERVACIONES =====
   secHdr('5','Observaciones de M. Preventivo');
-  const obsFields = ['USUARIO ASIGNADO','FICHA USUARIO'];
-  const obsChanges = last.changes.filter(c => obsFields.includes(c.field));
-  const obsText = obsChanges.length > 0 
-    ? obsChanges.map(c => c.field+': '+c.original+' \u2192 '+c.updated).join(' | ')
-    : (last.observations || '');
+  let obsText = last.observations || '';
+  const chgUser = last.changes.find(c => c.field === 'USUARIO ASIGNADO');
+  const chgFicha = last.changes.find(c => c.field === 'FICHA USUARIO');
+  if (chgUser || chgFicha) {
+    const nameIni = chgUser ? chgUser.original : (gv('USUARIO ASIGNADO') || '');
+    const nameFin = chgUser ? chgUser.updated : (gv('USUARIO ASIGNADO') || '');
+    const fichaIni = chgFicha ? chgFicha.original : (gv('FICHA USUARIO') || '');
+    const fichaFin = chgFicha ? chgFicha.updated : (gv('FICHA USUARIO') || '');
+    obsText = 'USUARIO ASIGNADO INICIAL: ' + nameIni + ', Ficha: ' + fichaIni
+      + '\nUSUARIO ASIGNADO FINAL: ' + nameFin + ', Ficha: ' + fichaFin;
+  }
   fn('normal',5.5); sT(VAL);
   const obsMaxW = CW - 6;
   const obsL = doc.splitTextToSize(obsText, obsMaxW);
@@ -2906,6 +2912,12 @@ function exportRecord() {
   rr(ML, y, CW, obsBoxH, 1.5, WHITE, CELL_BD);
   doc.text(obsL, ML+3, y+4);
   y += obsBoxH + 2;
+```
+
+**Ahora el campo mostrará:**
+```
+USUARIO ASIGNADO INICIAL: Gonzales Soto, Wilfredo Martin, Ficha: 14070
+USUARIO ASIGNADO FINAL: Guevara Chavez, Victor Aldrhing, Ficha: 12877
 
   // Separator
   sD([232,237,242]); doc.setLineWidth(0.2);
