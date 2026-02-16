@@ -2893,12 +2893,14 @@ function exportRecord() {
 
 // ===== 5. OBSERVACIONES =====
   secHdr('5','Observaciones de M. Preventivo');
-  var obsT=''; try{var cU=null,cF=null;for(var ci=0;ci<last.changes.length;ci++){if(last.changes[ci].field==='USUARIO ASIGNADO')cU=last.changes[ci];if(last.changes[ci].field==='FICHA USUARIO')cF=last.changes[ci];}if(cU||cF){obsT='USUARIO ASIGNADO INICIAL: '+(cU?cU.original:'')+', Ficha: '+(cF?cF.original:'')+'\nUSUARIO ASIGNADO FINAL: '+(cU?cU.updated:'')+', Ficha: '+(cF?cF.updated:'');}else{obsT=last.observations||'';}}catch(oe){obsT=last.observations||'';}
-  fn('normal',5.5); sT(VAL);
-  var oW=CW-6,oL=doc.splitTextToSize(obsT,oW),oLH=3,oBH=Math.max(10,oL.length*oLH+5);
-  rr(ML,y,CW,oBH,1.5,WHITE,CELL_BD);
-  doc.text(oL,ML+3,y+4);
-  y+=oBH+2;
+  rr(ML, y, CW, 12, 1.5, WHITE, CELL_BD);
+  const obsText = last.changes.length > 0 
+    ? last.changes.map(c => c.field+': '+c.original+' \u2192 '+c.updated).join(' | ')
+    : (last.observations || '');
+  fn('normal',6); sT(VAL);
+  const obsL = doc.splitTextToSize(obsText, CW-8);
+  doc.text(obsL.slice(0,3), ML+4, y+5);
+  y += 14;
 ```
 
 **Ahora el campo mostrará:**
