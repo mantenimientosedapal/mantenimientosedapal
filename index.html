@@ -2893,25 +2893,12 @@ function exportRecord() {
 
 // ===== 5. OBSERVACIONES =====
   secHdr('5','Observaciones de M. Preventivo');
-  let obsText = last.observations || '';
-  const chgUser = last.changes.find(c => c.field === 'USUARIO ASIGNADO');
-  const chgFicha = last.changes.find(c => c.field === 'FICHA USUARIO');
-  if (chgUser || chgFicha) {
-    const nameIni = chgUser ? chgUser.original : (gv('USUARIO ASIGNADO') || '');
-    const nameFin = chgUser ? chgUser.updated : (gv('USUARIO ASIGNADO') || '');
-    const fichaIni = chgFicha ? chgFicha.original : (gv('FICHA USUARIO') || '');
-    const fichaFin = chgFicha ? chgFicha.updated : (gv('FICHA USUARIO') || '');
-    obsText = 'USUARIO ASIGNADO INICIAL: ' + nameIni + ', Ficha: ' + fichaIni
-      + '\nUSUARIO ASIGNADO FINAL: ' + nameFin + ', Ficha: ' + fichaFin;
-  }
+  var obsT=''; try{var cU=null,cF=null;for(var ci=0;ci<last.changes.length;ci++){if(last.changes[ci].field==='USUARIO ASIGNADO')cU=last.changes[ci];if(last.changes[ci].field==='FICHA USUARIO')cF=last.changes[ci];}if(cU||cF){obsT='USUARIO ASIGNADO INICIAL: '+(cU?cU.original:'')+', Ficha: '+(cF?cF.original:'')+'\nUSUARIO ASIGNADO FINAL: '+(cU?cU.updated:'')+', Ficha: '+(cF?cF.updated:'');}else{obsT=last.observations||'';}}catch(oe){obsT=last.observations||'';}
   fn('normal',5.5); sT(VAL);
-  const obsMaxW = CW - 6;
-  const obsL = doc.splitTextToSize(obsText, obsMaxW);
-  const obsLineH = 3;
-  const obsBoxH = Math.max(10, obsL.length * obsLineH + 5);
-  rr(ML, y, CW, obsBoxH, 1.5, WHITE, CELL_BD);
-  doc.text(obsL, ML+3, y+4);
-  y += obsBoxH + 2;
+  var oW=CW-6,oL=doc.splitTextToSize(obsT,oW),oLH=3,oBH=Math.max(10,oL.length*oLH+5);
+  rr(ML,y,CW,oBH,1.5,WHITE,CELL_BD);
+  doc.text(oL,ML+3,y+4);
+  y+=oBH+2;
 ```
 
 **Ahora el campo mostrará:**
