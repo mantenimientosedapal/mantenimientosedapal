@@ -2891,16 +2891,19 @@ function exportRecord() {
   });
   y = Math.max(y + 3*4.3 + 3, tiy + 1);
 
-  // ===== 5. OBSERVACIONES =====
+// ===== 5. OBSERVACIONES =====
   secHdr('5','Observaciones de M. Preventivo');
-  rr(ML, y, CW, 12, 1.5, WHITE, CELL_BD);
   const obsText = last.changes.length > 0 
     ? last.changes.map(c => c.field+': '+c.original+' \u2192 '+c.updated).join(' | ')
     : (last.observations || '');
   fn('normal',6); sT(VAL);
   const obsL = doc.splitTextToSize(obsText, CW-8);
-  doc.text(obsL.slice(0,3), ML+4, y+5);
-  y += 14;
+  const obsLineH = 3.5;
+  const obsPad = 4;
+  const obsBoxH = Math.max(12, obsL.length * obsLineH + obsPad * 2);
+  rr(ML, y, CW, obsBoxH, 1.5, WHITE, CELL_BD);
+  doc.text(obsL, ML+4, y+obsPad+2.5);
+  y += obsBoxH + 2;
 
   // Separator
   sD([232,237,242]); doc.setLineWidth(0.2);
