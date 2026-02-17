@@ -2893,14 +2893,30 @@ function exportRecord() {
 
   // ===== 5. OBSERVACIONES =====
   secHdr('5','Observaciones de M. Preventivo');
-  rr(ML, y, CW, 12, 1.5, WHITE, CELL_BD);
-  const obsText = last.changes.length > 0 
-    ? last.changes.map(c => c.field+': '+c.original+' \u2192 '+c.updated).join(' | ')
-    : (last.observations || '');
-  fn('normal',6); sT(VAL);
-  const obsL = doc.splitTextToSize(obsText, CW-8);
-  doc.text(obsL.slice(0,3), ML+4, y+5);
-  y += 14;
+  var obsText5 = last.observations || '';
+  try {
+    var chgU5 = null;
+    var chgF5 = null;
+    for (var ci5 = 0; ci5 < last.changes.length; ci5++) {
+      if (last.changes[ci5].field === 'USUARIO ASIGNADO') { chgU5 = last.changes[ci5]; }
+      if (last.changes[ci5].field === 'FICHA USUARIO') { chgF5 = last.changes[ci5]; }
+    }
+    if (chgU5 || chgF5) {
+      var nIni5 = chgU5 ? chgU5.original : '';
+      var nFin5 = chgU5 ? chgU5.updated : '';
+      var fIni5 = chgF5 ? chgF5.original : '';
+      var fFin5 = chgF5 ? chgF5.updated : '';
+      obsText5 = 'USUARIO ASIGNADO INICIAL: ' + nIni5 + ', Ficha: ' + fIni5 + '\nUSUARIO ASIGNADO FINAL: ' + nFin5 + ', Ficha: ' + fFin5;
+    }
+  } catch(oe5) { obsText5 = last.observations || ''; }
+  fn('normal', 5.5); sT(VAL);
+  var obsW5 = CW - 6;
+  var obsL5 = doc.splitTextToSize(obsText5, obsW5);
+  var obsLH5 = 3;
+  var obsBH5 = Math.max(10, obsL5.length * obsLH5 + 5);
+  rr(ML, y, CW, obsBH5, 1.5, WHITE, CELL_BD);
+  doc.text(obsL5, ML + 3, y + 4);
+  y += obsBH5 + 2;
 
   // Separator
   sD([232,237,242]); doc.setLineWidth(0.2);
