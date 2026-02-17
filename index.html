@@ -1309,6 +1309,10 @@ body {
       </div>
       <span class="counter-badge" id="historyCount">0</span>
     </div>
+    <button class="btn btn-outline" onclick="if(confirm('¿Borrar historial de sesión?')){APP.history=[];localStorage.removeItem('sedapal_history');document.getElementById('historyList').innerHTML='<div class=\'empty-state\'><h3>Sin registros aún</h3><p>Los equipos procesados aparecerán aquí</p></div>';document.getElementById('historyCount').textContent='0';showToast('🗑️ Historial borrado');}" style="font-size:11px;padding:4px 10px;">
+      🗑️ Limpiar
+    </button>
+    </div>
     <div id="historyList">
       <div class="empty-state">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
