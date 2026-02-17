@@ -2982,7 +2982,7 @@ function exportRecord() {
   doc.line(ML, H-8, W-MR, H-8);
   sF(BLU); doc.rect(0,H-2,W,2,'F');
   fn('normal',5.5); sT(LBL);
-  doc.text('Proyecto MANANTIAL \u2014 Mantenimiento Preventivo SEDAPAL ETIC \u2014 Derechos Reservados', W/2, H-4, {align:'center'});
+  doc.text('Mantenimiento Preventivo SEDAPAL ETIC \u2014 GGSE', W/2, H-4, {align:'center'});
 
   const pdfFileName = 'RMP_'+rmpCode+'_'+new Date().toISOString().slice(0,10)+'.pdf';
   doc.save(pdfFileName);
