@@ -1061,10 +1061,7 @@ body {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6" y2="16"/><line x1="9" y1="8" x2="9" y2="16"/><line x1="12" y1="8" x2="14" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg>
         Escanear Código
       </button>
-      <button class="btn btn-scan" onclick="startSerialScanner()" style="flex:1;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 7h.01M7 12h.01M7 17h.01M12 7h.01M12 12h.01M12 17h.01M17 7h.01M17 12h.01"/></svg>
-        Escanear Serie
-      </button>
+
     </div>
 
     <div id="scannerContainer">
@@ -1112,38 +1109,22 @@ body {
       </div>
     </div>
 
-    <!-- SERIAL SCAN & VERIFICATION -->
+    <!-- ESTADO PREVIO DEL EQUIPO -->
     <div class="section" style="animation-delay: 0.2s;">
       <div class="section-header">
-        <div class="section-icon orange">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6" y2="16"/><line x1="9" y1="8" x2="9" y2="16"/><line x1="12" y1="8" x2="14" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg>
+        <div class="section-icon" style="background:#FEF2F2;color:#DC2626;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
         <div>
-          <div class="section-title">Verificación de Series</div>
-          <div class="section-desc">Validar series de todos los periféricos</div>
+          <div class="section-title">Estado Previo del Equipo</div>
+          <div class="section-desc">Evidencia del estado ANTES del mantenimiento</div>
         </div>
       </div>
 
-      <div id="serialChecklist" style="display:flex;flex-direction:column;gap:8px;">
-        <!-- Populated dynamically -->
+      <div class="field-group">
+        <div class="field-label">🔍 Observaciones del Técnico</div>
+        <textarea class="conformity-input" id="techObservations" placeholder="Describa el estado del equipo" rows="3" style="resize:vertical;border-color:#FECACA;"></textarea>
       </div>
-
-      <div style="margin-top:12px;">
-        <div class="search-group">
-          <div class="search-input-wrap">
-            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6" y2="16"/></svg>
-            <input type="text" class="search-input" id="serialInput" placeholder="Escanear o ingresar serie para verificar...">
-          </div>
-          <button class="btn btn-scan" onclick="startSerialScanVerify()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          </button>
-        </div>
-        <button class="btn btn-outline btn-block" onclick="verifySerialAuto()" style="font-size:13px;">
-          🔍 Buscar serie en periféricos del equipo
-        </button>
-      </div>
-
-      <div id="serialResult" style="margin-top: 10px;"></div>
     </div>
 
     <!-- PHOTOS SECTION -->
@@ -1159,29 +1140,50 @@ body {
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px;">
-        <div class="photo-slot" id="photoSlot1" onclick="takePhoto(1)">
-          <input type="file" accept="image/*" capture="environment" id="photoInput1" onchange="handlePhoto(1,this)" style="display:none;">
+        <div class="photo-slot" id="photoSlot1" onclick="showPhotoChoice(1)">
+          <input type="file" accept="image/*" capture="environment" id="photoCam1" onchange="handlePhoto(1,this)" style="display:none;">
+          <input type="file" accept="image/*" id="photoGal1" onchange="handlePhoto(1,this)" style="display:none;">
           <div id="photoPreview1" class="photo-preview">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
             <div style="font-size:10px;color:#94A3B8;margin-top:4px;font-weight:600;">📷 EQUIPO</div>
           </div>
         </div>
-        <div class="photo-slot" id="photoSlot2" onclick="takePhoto(2)">
-          <input type="file" accept="image/*" capture="environment" id="photoInput2" onchange="handlePhoto(2,this)" style="display:none;">
+        <div class="photo-slot" id="photoSlot2" onclick="showPhotoChoice(2)">
+          <input type="file" accept="image/*" capture="environment" id="photoCam2" onchange="handlePhoto(2,this)" style="display:none;">
+          <input type="file" accept="image/*" id="photoGal2" onchange="handlePhoto(2,this)" style="display:none;">
           <div id="photoPreview2" class="photo-preview">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
             <div style="font-size:10px;color:#94A3B8;margin-top:4px;font-weight:600;">🏷️ CÓDIGO INV.</div>
           </div>
         </div>
-        <div class="photo-slot" id="photoSlot3" onclick="takePhoto(3)">
-          <input type="file" accept="image/*" capture="environment" id="photoInput3" onchange="handlePhoto(3,this)" style="display:none;">
+        <div class="photo-slot" id="photoSlot3" onclick="showPhotoChoice(3)">
+          <input type="file" accept="image/*" capture="environment" id="photoCam3" onchange="handlePhoto(3,this)" style="display:none;">
+          <input type="file" accept="image/*" id="photoGal3" onchange="handlePhoto(3,this)" style="display:none;">
           <div id="photoPreview3" class="photo-preview">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
             <div style="font-size:10px;color:#94A3B8;margin-top:4px;font-weight:600;">🔄 CAMBIO</div>
           </div>
         </div>
       </div>
-      <div id="photoCount" style="font-size:11px;color:#64748B;text-align:center;">Toca para tomar foto con la cámara — Opcional</div>
+      <div id="photoCount" style="font-size:11px;color:#64748B;text-align:center;">Toca para tomar foto o seleccionar de galería — Opcional</div>
+
+      <!-- PHOTO CHOICE MODAL -->
+      <div id="photoChoiceModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:1000;align-items:flex-end;justify-content:center;padding:16px;">
+        <div style="background:white;border-radius:16px 16px 16px 16px;width:100%;max-width:400px;overflow:hidden;animation:modalIn 0.3s ease;">
+          <div style="padding:16px 20px;text-align:center;border-bottom:1px solid #E2E8F0;">
+            <div style="font-size:15px;font-weight:700;color:#1E293B;" id="photoChoiceTitle">Seleccionar foto</div>
+          </div>
+          <button onclick="chooseCamera()" style="width:100%;padding:14px 20px;border:none;background:white;font-size:15px;font-family:'DM Sans',sans-serif;color:#0057A8;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:12px;border-bottom:1px solid #E2E8F0;">
+            <span style="font-size:22px;">📸</span> Tomar foto con cámara
+          </button>
+          <button onclick="chooseGallery()" style="width:100%;padding:14px 20px;border:none;background:white;font-size:15px;font-family:'DM Sans',sans-serif;color:#0057A8;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:12px;border-bottom:1px solid #E2E8F0;">
+            <span style="font-size:22px;">🖼️</span> Seleccionar de galería / archivos
+          </button>
+          <button onclick="closePhotoChoice()" style="width:100%;padding:14px 20px;border:none;background:#F8FAFC;font-size:15px;font-family:'DM Sans',sans-serif;color:#EF4444;font-weight:600;cursor:pointer;">
+            Cancelar
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- SIGNATURE & CONFORMITY -->
@@ -1312,7 +1314,6 @@ body {
     <button class="btn btn-outline" onclick="if(confirm('¿Borrar historial de sesión?')){APP.history=[];localStorage.removeItem('sedapal_history');document.getElementById('historyList').innerHTML='<div class=\'empty-state\'><h3>Sin registros aún</h3><p>Los equipos procesados aparecerán aquí</p></div>';document.getElementById('historyCount').textContent='0';showToast('🗑️ Historial borrado');}" style="font-size:11px;padding:4px 10px;">
       🗑️ Limpiar
     </button>
-    </div>
     <div id="historyList">
       <div class="empty-state">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -1347,6 +1348,12 @@ body {
     <p id="errorMessage">Ha ocurrido un error.</p>
     <button class="btn btn-primary btn-block" onclick="closeModal()">Entendido</button>
   </div>
+</div>
+
+<!-- PENDING SYNC BAR -->
+<div id="pendingSyncBar" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#FEF3C7;border-top:2px solid #F59E0B;padding:10px 16px;z-index:900;font-size:13px;color:#92400E;text-align:center;">
+  <span id="pendingSyncText">📤 1 registro pendiente de envío</span>
+  <button onclick="retrySendPending()" style="margin-left:8px;background:#F59E0B;color:white;border:none;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Reintentar ahora</button>
 </div>
 
 <!-- TOAST -->
@@ -1483,6 +1490,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSignature();
   initTechSignature();
   initEventListeners();
+  updatePendingBar();
 });
 
 function initDate() {
@@ -1501,9 +1509,7 @@ function initEventListeners() {
     document.getElementById('obsGroup').style.display = this.value.includes('observaciones') || this.value === 'No conforme' ? 'block' : 'none';
   });
 
-  document.getElementById('serialInput').addEventListener('keypress', e => {
-    if (e.key === 'Enter') verifySerial();
-  });
+
 }
 
 // ===== CONFIG =====
@@ -1704,7 +1710,7 @@ function updateConnectionStatus() {
     status.className = 'config-status connected';
     status.textContent = '🟡 Modo Demo activo';
   } else if (APP.csvData) {
-    badge.textContent = `📂 ${APP.csvData.length}`;
+    badge.textContent = '⚙️ Config';
     badge.style.background = 'rgba(16,185,129,0.2)';
     status.className = 'config-status connected';
     status.textContent = `🟢 CSV cargado — ${APP.csvData.length} equipos`;
@@ -1753,13 +1759,7 @@ async function searchEquipment() {
       APP.currentEquipment = { ...data };
       APP.originalData = { ...data };
       APP.changes = [];
-      // Reset serial validation
-      Object.keys(serialValidation).forEach(k => delete serialValidation[k]);
-      SERIAL_FIELDS.forEach(sf => {
-        if (findFieldValue(data, sf.key)) serialValidation[sf.key] = 'pending';
-      });
       renderEquipment(data);
-      renderSerialChecklist();
       document.getElementById('equipmentSection').style.display = 'block';
       document.getElementById('equipmentSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
       showToast('✅ Equipo encontrado');
@@ -1864,10 +1864,10 @@ function renderEquipment(data) {
         const autoFichaHint = field.isAutoFicha ? '<div style="font-size:10px;color:#0891B2;margin-top:2px;">💡 Cambie la ficha para actualizar el usuario</div>' : '';
         div.innerHTML = `
           <div class="field-label">${field.label}${serieTag}</div>
-          <input type="text" class="field-input" 
-            data-key="${field.key}" 
-            data-original="${value}" 
-            value="${value}" 
+          <input type="text" class="field-input"
+            data-key="${field.key}"
+            data-original="${value}"
+            value="${value}"
             style="${field.isSerie ? 'font-family:JetBrains Mono,monospace;color:#DC2626;font-weight:600;' : ''}"
             onchange="trackChange(this)" ${autoFichaAttr}>
           ${autoFichaHint}
@@ -1953,84 +1953,10 @@ function renderChanges() {
 }
 
 // ===== SERIAL VERIFICATION =====
-const SERIAL_FIELDS = [
-  { key: 'SERIE EQUIPO', label: 'Serie Equipo (CPU/Laptop)', icon: '💻' },
-  { key: 'SERIE MONITOR 1', label: 'Serie Monitor Principal', icon: '🖥️' },
-  { key: 'SERIE MONITOR 2', label: 'Serie Segundo Monitor', icon: '🖥️' },
-  { key: 'SERIE TECLADO', label: 'Serie Teclado', icon: '⌨️' },
-  { key: 'SERIE MOUSE', label: 'Serie Mouse', icon: '🖱️' },
-];
-
-const serialValidation = {};
-
-function renderSerialChecklist() {
-  const container = document.getElementById('serialChecklist');
-  if (!APP.currentEquipment) return;
-
-  container.innerHTML = SERIAL_FIELDS.map(sf => {
-    const dbVal = findFieldValue(APP.currentEquipment, sf.key);
-    if (!dbVal) return '';
-    const status = serialValidation[sf.key];
-    const statusIcon = status === 'ok' ? '✅' : status === 'fail' ? '❌' : '⏳';
-    const statusColor = status === 'ok' ? '#10B981' : status === 'fail' ? '#EF4444' : '#94A3B8';
-    const statusBg = status === 'ok' ? '#ECFDF5' : status === 'fail' ? '#FEF2F2' : '#F8FAFC';
-
-    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:${statusBg};border-radius:8px;border:1px solid ${statusColor}20;">
-      <span style="font-size:16px;">${statusIcon}</span>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:11px;font-weight:600;color:var(--text-secondary);">${sf.icon} ${sf.label}</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:${statusColor};overflow:hidden;text-overflow:ellipsis;">${dbVal}</div>
-      </div>
-      <span style="font-size:10px;font-weight:700;color:${statusColor};text-transform:uppercase;">${status === 'ok' ? 'Validado' : status === 'fail' ? 'No coincide' : 'Pendiente'}</span>
-    </div>`;
-  }).filter(Boolean).join('');
-}
-
-function verifySerialAuto() {
-  const input = document.getElementById('serialInput').value.trim();
-  const result = document.getElementById('serialResult');
-
-  if (!input) { showToast('⚠️ Ingrese un número de serie'); return; }
-  if (!APP.currentEquipment) { showToast('⚠️ Primero busque un equipo'); return; }
-
-  let found = false;
-  SERIAL_FIELDS.forEach(sf => {
-    const dbVal = findFieldValue(APP.currentEquipment, sf.key);
-    if (dbVal && input.toLowerCase() === dbVal.toLowerCase()) {
-      serialValidation[sf.key] = 'ok';
-      found = true;
-      result.innerHTML = `<div class="validation-bar match">✅ ¡Coincide! Serie "${input}" corresponde a: <strong>${sf.label}</strong></div>`;
-    }
-  });
-
-  if (!found) {
-    // Check which serials exist for a helpful message
-    const existing = SERIAL_FIELDS.filter(sf => findFieldValue(APP.currentEquipment, sf.key)).map(sf => `${sf.icon} ${sf.label}: <strong>${findFieldValue(APP.currentEquipment, sf.key)}</strong>`);
-    result.innerHTML = `<div class="validation-bar mismatch">⚠️ Serie "${input}" no coincide con ningún periférico registrado.</div>
-    <div style="margin-top:8px;padding:10px;background:#F8FAFC;border-radius:8px;font-size:12px;line-height:1.8;">
-      <strong>Series registradas:</strong><br>${existing.join('<br>')}
-    </div>`;
-  }
-
-  document.getElementById('serialInput').value = '';
-  renderSerialChecklist();
-}
-
-function verifySerial() { verifySerialAuto(); }
 
 // ===== SCANNER =====
 async function startBarcodeScanner() {
   APP.scanMode = 'code';
-  await startCamera();
-}
-
-async function startSerialScanner() {
-  APP.scanMode = 'serial_search';
-  await startCamera();
-}
-
-async function startSerialScanVerify() {
-  APP.scanMode = 'serial_verify';
   await startCamera();
 }
 
@@ -2074,12 +2000,6 @@ function handleScannedValue(value) {
   if (APP.scanMode === 'code') {
     document.getElementById('equipCode').value = value;
     searchEquipment();
-  } else if (APP.scanMode === 'serial_search') {
-    document.getElementById('equipCode').value = value;
-    searchEquipment();
-  } else if (APP.scanMode === 'serial_verify') {
-    document.getElementById('serialInput').value = value;
-    verifySerial();
   }
   showToast('✅ Código escaneado: ' + value);
 }
@@ -2314,6 +2234,11 @@ function undoTechSignature() {
 
 // ===== SUBMIT =====
 function submitMaintenance() {
+  // Prevent double tap
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn.disabled) return;
+  submitBtn.disabled = true;
+
   const techName = document.getElementById('techName').value.trim();
   const userName = document.getElementById('userName').value.trim();
   const userFichaVal = document.getElementById('userFicha').value.trim();
@@ -2321,11 +2246,11 @@ function submitMaintenance() {
   const obs = document.getElementById('observations')?.value?.trim() || '';
 
   // Validations
-  if (!techName) { showToast('⚠️ Ingrese el nombre del técnico'); document.getElementById('techName').focus(); return; }
-  if (!APP.currentEquipment) { showToast('⚠️ Primero busque un equipo'); return; }
-  if (!userName) { showToast('⚠️ Ingrese el nombre del usuario'); document.getElementById('userName').focus(); return; }
-  if (!status) { showToast('⚠️ Seleccione el estado del mantenimiento'); return; }
-  if (!APP.hasSigned) { showToast('⚠️ Se requiere la firma del usuario'); return; }
+  if (!techName) { showToast('⚠️ Ingrese el nombre del técnico'); document.getElementById('techName').focus(); submitBtn.disabled = false; return; }
+  if (!APP.currentEquipment) { showToast('⚠️ Primero busque un equipo'); submitBtn.disabled = false; return; }
+  if (!userName) { showToast('⚠️ Ingrese el nombre del usuario'); document.getElementById('userName').focus(); submitBtn.disabled = false; return; }
+  if (!status) { showToast('⚠️ Seleccione el estado del mantenimiento'); submitBtn.disabled = false; return; }
+  if (!APP.hasSigned) { showToast('⚠️ Se requiere la firma del usuario'); submitBtn.disabled = false; return; }
 
   // Build the updated equipment with current field values
   const updatedEquipment = { ...APP.currentEquipment };
@@ -2344,6 +2269,7 @@ function submitMaintenance() {
     userFicha: document.getElementById('userFicha').value.trim(),
     userCargo: document.getElementById('userCargo').value.trim(),
     photos: { ...APP_PHOTOS },
+    techObservations: document.getElementById('techObservations').value.trim(),
     status,
     observations: obs,
     survey: { ...APP_SURVEY },
@@ -2357,22 +2283,54 @@ function submitMaintenance() {
   // Generate PDF first (stores base64 in APP.lastPdfBase64)
   exportRecord();
 
-  // Send to Google Sheets if webhook configured (includes PDF base64)
-  sendToGoogleSheets(record);
+  // Build payload and save to send queue
+  const payload = buildPayload(record);
+  const queueId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+
+  try {
+    const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
+    queue.push({ payload, queuedAt: new Date().toISOString(), id: queueId });
+    localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
+    updatePendingBar();
+  } catch(e) {
+    console.error('Cola llena:', e);
+  }
 
   renderHistory();
 
   const code = record.code;
-  document.getElementById('successMessage').textContent = `Equipo ${code} registrado como "${status}" por ${userName}.`;
+  document.getElementById('successMessage').textContent = `Equipo ${code} registrado como "${status}" por ${userName}.\n📤 Se enviará automáticamente.`;
   document.getElementById('successModal').classList.add('active');
+  submitBtn.disabled = false;
+
+  // Try to send queue after a brief delay
+  setTimeout(() => retrySendPending(), 2000);
 }
 
-// ===== SEND TO GOOGLE SHEETS =====
+// sendToGoogleSheets is kept for compatibility but no longer used from submit
 async function sendToGoogleSheets(record) {
   const url = APP.config.webhookUrl;
-  if (!url) { showToast('⚠️ Configure la URL del Web App en ⚙️ Config'); return; }
+  if (!url) return;
+  const payload = buildPayload(record);
+  try {
+    await fetch(url, { method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'data=' + encodeURIComponent(JSON.stringify(payload)) });
+  } catch(e) {}
+}
 
-  // Build flat row with all fields
+// Real internet check — loads a tiny image (no CORS issues, truly fails without internet)
+function checkRealConnection() {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const timeout = setTimeout(() => { img.src = ''; resolve(false); }, 5000);
+    img.onload = () => { clearTimeout(timeout); resolve(true); };
+    img.onerror = () => { clearTimeout(timeout); resolve(false); };
+    img.src = 'https://www.google.com/favicon.ico?_=' + Date.now();
+  });
+}
+
+function buildPayload(record) {
   const eq = record.equipment;
   const COLS = FIELD_GROUPS.flatMap(g => g.fields.map(f => f.key));
 
@@ -2382,13 +2340,11 @@ async function sendToGoogleSheets(record) {
     'CÓDIGO_INVENTARIO': record.code,
   };
 
-  // Add all equipment fields
   COLS.forEach(key => {
     const clean = key.replace(/ /g, '_');
     payload[clean] = findFieldValue(eq, key) || '';
   });
 
-  // Add maintenance info
   payload.CAMBIOS_REALIZADOS = record.changes.map(c => `${c.field}: ${c.original} → ${c.updated}`).join(' | ') || 'Sin cambios';
   payload.USUARIO_CONFORMIDAD = record.userName;
   payload.FICHA_CONFORMIDAD = record.userFicha;
@@ -2396,19 +2352,11 @@ async function sendToGoogleSheets(record) {
   payload.ESTADO_CONFORMIDAD = record.status;
   payload.OBSERVACIONES = record.observations || '';
   payload.TIENE_FIRMA = 'SÍ';
-
-  // Add photos as base64 (will be saved to Drive by Apps Script)
   payload.FOTO_EQUIPO = record.photos[1] || '';
   payload.FOTO_CODIGO = record.photos[2] || '';
   payload.FOTO_CAMBIO = record.photos[3] || '';
-
-  // Serial validation status
-  payload.VALIDACION_SERIES = SERIAL_FIELDS.map(sf => {
-    const st = serialValidation[sf.key];
-    return st ? `${sf.label}: ${st === 'ok' ? '✅' : st === 'fail' ? '❌' : '⏳'}` : '';
-  }).filter(Boolean).join(' | ');
-
-  // NEW v7: Survey, signatures, timing
+  payload.OBSERVACIONES_TECNICO = record.techObservations || '';
+  payload.VALIDACION_SERIES = '';
   payload.ENCUESTA_TRATO = String(record.survey ? record.survey.trato : 0);
   payload.ENCUESTA_CONFORMIDAD = String(record.survey ? record.survey.conformidad : 0);
   payload.FIRMA_TECNICO = record.techSignature || '';
@@ -2417,44 +2365,174 @@ async function sendToGoogleSheets(record) {
   payload.HORA_FIN = new Date(record.timestamp).toLocaleString('es-PE');
   const durMin = record.startTime ? Math.round((new Date(record.timestamp) - new Date(record.startTime)) / 60000) : 0;
   payload.DURACION = durMin >= 60 ? Math.floor(durMin/60) + 'h ' + (durMin%60) + 'min' : durMin + 'min';
-
-  // PDF base64 from jsPDF (generated locally)
   payload.PDF_BASE64 = APP.lastPdfBase64 || '';
 
+  return payload;
+}
+
+// ===== OFFLINE QUEUE =====
+function queueForLater(payload, silent) {
   try {
-    // Send as JSON string via form-encoded POST
-    const payloadStr = JSON.stringify(payload);
-    
-    const resp = await fetch(url, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'data=' + encodeURIComponent(payloadStr)
-    });
-    
-    showToast('☁️ Registro enviado a Google Sheets ✅');
-  } catch(err) {
-    console.error('Error sending to Sheets:', err);
-    showToast('⚠️ No se pudo enviar a Google Sheets');
-    try {
-      const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
-      queue.push(payload);
-      localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
-    } catch(e) {}
+    const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
+    queue.push({ payload, queuedAt: new Date().toISOString(), id: payload._queueId || Date.now().toString() });
+    localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
+    updatePendingBar();
+    if (!silent) {
+      showToast('💾 Sin señal — Registro guardado. Se enviará al recuperar conexión.');
+    }
+  } catch(e) {
+    console.error('Error saving to queue:', e);
   }
 }
+
+function removeFromQueue(queueId) {
+  try {
+    let queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
+    queue = queue.filter(item => item.id !== queueId);
+    localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
+    updatePendingBar();
+  } catch(e) {}
+}
+
+function updatePendingBar() {
+  const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
+  const bar = document.getElementById('pendingSyncBar');
+  const text = document.getElementById('pendingSyncText');
+  if (queue.length > 0) {
+    bar.style.display = 'block';
+    text.textContent = `📤 ${queue.length} registro${queue.length > 1 ? 's' : ''} pendiente${queue.length > 1 ? 's' : ''} de envío`;
+    document.querySelector('.main').style.paddingBottom = '140px';
+  } else {
+    bar.style.display = 'none';
+    document.querySelector('.main').style.paddingBottom = '100px';
+  }
+}
+
+let _retryLock = false;
+
+async function retrySendPending() {
+  if (_retryLock) return;
+  _retryLock = true;
+
+  const url = APP.config.webhookUrl;
+  if (!url) { _retryLock = false; return; }
+
+  let queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
+  if (queue.length === 0) { updatePendingBar(); _retryLock = false; return; }
+
+  const bar = document.getElementById('pendingSyncText');
+  let sent = 0;
+
+  for (let i = 0; i < queue.length; i++) {
+    bar.textContent = `⏳ Enviando ${i + 1} de ${queue.length}...`;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+      // Use a real fetch (not no-cors) to detect actual network failure
+      // Fetch to google.com will fail CORS but proves internet works
+      // If it throws TypeError/NetworkError, there's no internet
+      try {
+        await fetch('https://www.google.com/generate_204', {
+          method: 'HEAD',
+          mode: 'no-cors',
+          cache: 'no-store',
+          signal: controller.signal
+        });
+      } catch(pingErr) {
+        clearTimeout(timeoutId);
+        // Network error — stop trying
+        showToast('📵 Sin conexión — Se reintentará automáticamente');
+        break;
+      }
+
+      clearTimeout(timeoutId);
+
+      // Internet confirmed — send the payload
+      const sendController = new AbortController();
+      const sendTimeout = setTimeout(() => sendController.abort(), 90000);
+
+      await fetch(url, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'data=' + encodeURIComponent(JSON.stringify(queue[i].payload)),
+        signal: sendController.signal
+      });
+
+      clearTimeout(sendTimeout);
+
+      // Remove this specific item from queue
+      removeFromQueue(queue[i].id);
+      sent++;
+      await delay(2000);
+    } catch(err) {
+      console.error('Send failed:', err);
+      break;
+    }
+  }
+
+  updatePendingBar();
+  const remaining = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]').length;
+
+  if (sent > 0 && remaining === 0) {
+    showToast(`✅ ${sent} registro${sent > 1 ? 's' : ''} enviado${sent > 1 ? 's' : ''}`);
+  } else if (sent > 0) {
+    showToast(`⚠️ ${sent} enviado${sent > 1 ? 's' : ''}, ${remaining} pendiente${remaining > 1 ? 's' : ''}`);
+  }
+
+  _retryLock = false;
+}
+
+// Auto-sync triggers
+window.addEventListener('online', () => {
+  setTimeout(() => retrySendPending(), 3000);
+});
+
+window.addEventListener('offline', () => {
+  showToast('📵 Sin conexión a internet');
+});
+
+// Periodic auto-retry every 30 seconds
+setInterval(() => {
+  const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
+  if (queue.length > 0) retrySendPending();
+}, 30000);
 
 // ===== PHOTO HANDLING =====
 const APP_PHOTOS = { 1: null, 2: null, 3: null };
 const PHOTO_LABELS = { 1: '📷 EQUIPO', 2: '🏷️ CÓDIGO INV.', 3: '🔄 CAMBIO' };
-const MAX_PHOTO_SIZE = 1600; // max dimension in px
-const PHOTO_QUALITY = 0.9; // JPEG quality
+const MAX_PHOTO_SIZE = 1024; // max dimension in px (era 1600)
+const PHOTO_QUALITY = 0.7; // JPEG quality (era 0.9)
 
-function takePhoto(slot) {
-  document.getElementById('photoInput' + slot).click();
+let _photoSlotPending = 0;
+
+function showPhotoChoice(slot) {
+  // If already has photo, allow removing
+  if (APP_PHOTOS[slot]) return;
+  _photoSlotPending = slot;
+  const labels = {1:'📷 Equipo', 2:'🏷️ Código Inv.', 3:'🔄 Cambio'};
+  document.getElementById('photoChoiceTitle').textContent = 'Foto: ' + (labels[slot] || 'Foto');
+  const modal = document.getElementById('photoChoiceModal');
+  modal.style.display = 'flex';
+}
+
+function chooseCamera() {
+  closePhotoChoice();
+  document.getElementById('photoCam' + _photoSlotPending).click();
+}
+
+function chooseGallery() {
+  closePhotoChoice();
+  document.getElementById('photoGal' + _photoSlotPending).click();
+}
+
+function closePhotoChoice() {
+  document.getElementById('photoChoiceModal').style.display = 'none';
 }
 
 function handlePhoto(slot, input) {
+  closePhotoChoice(); // Ensure modal is closed
   const file = input.files[0];
   if (!file) return;
 
@@ -2507,8 +2585,14 @@ function removePhoto(slot) {
   slotDiv.style.position = '';
   preview.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg><div style="font-size:10px;color:#94A3B8;margin-top:4px;font-weight:600;">${PHOTO_LABELS[slot]}</div>`;
 
+  // Reset both file inputs
+  const camInput = document.getElementById('photoCam' + slot);
+  const galInput = document.getElementById('photoGal' + slot);
+  if (camInput) camInput.value = '';
+  if (galInput) galInput.value = '';
+
   const count = Object.values(APP_PHOTOS).filter(Boolean).length;
-  document.getElementById('photoCount').textContent = count > 0 ? `✅ ${count}/3 fotos` : 'Toca para tomar foto con la cámara — Opcional';
+  document.getElementById('photoCount').textContent = count > 0 ? `✅ ${count}/3 fotos` : 'Toca para tomar foto o seleccionar de galería — Opcional';
 }
 
 function resetPhotos() {
@@ -2519,7 +2603,7 @@ function resetPhotos() {
 function searchByFicha(ficha) {
   // CONFORMIDAD ONLY - does NOT touch equipment fields
   const resultDiv = document.getElementById('fichaResult');
-  
+
   if (!ficha || ficha.length < 3 || !APP.csvData) {
     resultDiv.style.display = 'none';
     return;
@@ -2541,17 +2625,17 @@ function searchByFicha(ficha) {
 
   // If exact match found
   const exact = matches.find(row => (findFieldValue(row, 'FICHA USUARIO') || '') === ficha);
-  
+
   if (exact) {
     const name = findFieldValue(exact, 'USUARIO ASIGNADO') || '';
     const cargo = findFieldValue(exact, 'CARGO') || '';
-    
+
     // ONLY update conformity fields (by ID, not by data-key)
     document.getElementById('userName').value = name;
     document.getElementById('userCargo').value = cargo;
     document.getElementById('nameAutoTag').style.display = 'inline';
     document.getElementById('cargoAutoTag').style.display = 'inline';
-    
+
     // Show success
     resultDiv.style.display = 'block';
     resultDiv.style.background = '#ECFDF5';
@@ -2574,7 +2658,7 @@ function searchByFicha(ficha) {
 function autocompleteFichaEquipo(ficha) {
   const resultDiv = document.getElementById('fichaEquipoResult');
   if (!resultDiv) return;
-  
+
   if (!ficha || ficha.length < 3 || !APP.csvData) {
     resultDiv.style.display = 'none';
     return;
@@ -2582,7 +2666,7 @@ function autocompleteFichaEquipo(ficha) {
 
   // Find user by ficha in CSV
   const match = APP.csvData.find(row => (findFieldValue(row, 'FICHA USUARIO') || '') === ficha);
-  
+
   if (match) {
     const name = findFieldValue(match, 'USUARIO ASIGNADO') || '';
     const cargo = findFieldValue(match, 'CARGO') || '';
@@ -2590,16 +2674,16 @@ function autocompleteFichaEquipo(ficha) {
     const gerencia = findFieldValue(match, 'GERENCIA') || '';
     const equipoFunc = findFieldValue(match, 'EQUIPO FUNCIONAL') || '';
     const grupoFunc = findFieldValue(match, 'GRUPO FUNCIONAL') || '';
-    
+
     resultDiv.style.display = 'block';
     resultDiv.style.background = '#ECFDF5';
     resultDiv.style.border = '1px solid #A7F3D0';
     resultDiv.innerHTML = '✅ <strong>' + name + '</strong> — ' + cargo;
-    
+
     // Update user fields + organization fields
-    const fieldsMap = { 
-      'USUARIO ASIGNADO': name, 
-      'CARGO': cargo, 
+    const fieldsMap = {
+      'USUARIO ASIGNADO': name,
+      'CARGO': cargo,
       'TIPO ASIGNACIÓN': tipo,
       'GERENCIA': gerencia,
       'EQUIPO FUNCIONAL': equipoFunc,
@@ -2614,11 +2698,11 @@ function autocompleteFichaEquipo(ficha) {
         input.style.borderColor = '#F59E0B';
       }
     });
-    
+
     // Track ficha change
     const fichaInput = document.querySelector('.field-input[data-key="FICHA USUARIO"]');
     if (fichaInput) trackChange(fichaInput);
-    
+
     showToast('👤 Usuario y organización actualizados: ' + name.split(',')[0]);
   } else {
     resultDiv.style.display = 'block';
@@ -2631,7 +2715,7 @@ function autocompleteFichaEquipo(ficha) {
 function updateEquipmentUser(newUserRow) {
   const fieldsToUpdate = ['FICHA USUARIO', 'USUARIO ASIGNADO', 'CARGO', 'TIPO ASIGNACIÓN'];
   let updated = 0;
-  
+
   fieldsToUpdate.forEach(key => {
     const newVal = findFieldValue(newUserRow, key) || '';
     const input = document.querySelector('.field-input[data-key="' + key + '"]');
@@ -2646,7 +2730,7 @@ function updateEquipmentUser(newUserRow) {
       }
     }
   });
-  
+
   if (updated > 0) {
     const name = findFieldValue(newUserRow, 'USUARIO ASIGNADO') || '';
     showToast('👤 Datos del equipo actualizados con info de ' + name.split(',')[0]);
@@ -2659,8 +2743,6 @@ function resetForm() {
   APP.changes = [];
   APP.startTime = null;
   document.getElementById('equipCode').value = '';
-  document.getElementById('serialInput').value = '';
-  document.getElementById('serialResult').innerHTML = '';
   document.getElementById('userName').value = '';
   document.getElementById('userFicha').value = '';
   document.getElementById('userCargo').value = '';
@@ -2668,6 +2750,7 @@ function resetForm() {
   document.getElementById('cargoAutoTag').style.display = 'none';
   document.getElementById('fichaResult').style.display = 'none';
   resetPhotos();
+  document.getElementById('techObservations').value = '';
   document.getElementById('maintStatus').value = '';
   document.getElementById('observations').value = '';
   document.getElementById('obsGroup').style.display = 'none';
@@ -2715,7 +2798,7 @@ function renderHistory() {
 function exportRecord() {
   if (APP.history.length === 0) return;
   const last = APP.history[0];
-  
+
   if (!window.jspdf) {
     showToast('⏳ Cargando generador de PDF...');
     const s = document.createElement('script');
@@ -2725,11 +2808,11 @@ function exportRecord() {
     document.head.appendChild(s);
     return;
   }
-  
+
   const eq = last.equipment;
   let JC; try { JC = window.jspdf.jsPDF; } catch(e) { try { JC = window.jsPDF; } catch(e2) {} }
   if (!JC) { alert('jsPDF no disponible'); return; }
-  
+
   try {
   const doc = new JC('p', 'mm', 'a4');
   const W = 210, H = 297, ML = 14, MR = 14, CW = W - ML - MR;
@@ -2741,6 +2824,7 @@ function exportRecord() {
   const isEsc = /SCANNER|ESCANER/.test(cat);
   const isTab = /TABLET/.test(cat);
   const isMon = /MONITOR/.test(cat);
+  const hasMon = !!(gv('MARCA MONITOR 1') || gv('SERIE MONITOR 1'));
 
   // Colors (RGB 0-255)
   const BLU = [0,119,182], BLU2 = [0,95,138], CYAN = [0,180,216];
@@ -2784,7 +2868,7 @@ function exportRecord() {
   fn('normal',6.5); sT(LBL);
   const rmpCode = gv('CÓDIGO INVENTARIO') || last.code;
   doc.text('SEDAPAL ETIC  |  RMP-'+rmpCode+'  |  '+new Date(last.timestamp).toLocaleDateString('es-PE')+'  |  T\u00e9cnico: '+(last.technician||''), W/2, y, {align:'center'});
-  
+
   // Timing bar (orange bg)
   y += 3;
   rr(ML,y,CW,5,1.5, SURV_BG, SURV_BD);
@@ -2851,7 +2935,7 @@ function exportRecord() {
   secHdr('4','Actividades de Mantenimiento realizados (Check list)');
   const cats = [
     {t:'PC / WS / LAPTOP', items:['Diagn\u00f3stico previo estado equipo','Validaci\u00f3n Software NO AUTORIZADO','Limpieza componentes Externos','Validaci\u00f3n Antivirus WithSecure','Validaci\u00f3n Agente Discovery','Prueba de Operatividad'], active:isPC},
-    {t:'MONITOR', items:['Diagn\u00f3stico previo estado equipo','Limpieza externa del equipo','Pruebas de Operatividad'], active:isPC||isMon},
+    {t:'MONITOR', items:['Diagn\u00f3stico previo estado equipo','Limpieza externa del equipo','Pruebas de Operatividad'], active:isMon||hasMon},
     {t:'IMPRESORA / PLOTTER', items:['Diagn\u00f3stico previo estado equipo','Identif. estado consumibles','Limpieza componentes internos','Lubricaci\u00f3n partes mec\u00e1nicas','Limpieza externa de equipo','Pruebas de Operatividad'], active:isImp},
     {t:'SCANNER', items:['Diagn\u00f3stico previo estado equipo','Limpieza interna partes mec\u00e1n.','Limpieza externa de equipo','Pruebas de Operatividad'], active:isEsc}
   ];
@@ -2989,12 +3073,12 @@ function exportRecord() {
   const pdfFileName = 'RMP_'+rmpCode+'_'+new Date().toISOString().slice(0,10)+'.pdf';
   doc.save(pdfFileName);
   showToast('\ud83d\udcc4 RMP descargado en PDF');
-  
+
   // Store PDF base64 for sending to Drive
   try {
     APP.lastPdfBase64 = doc.output('datauristring');
   } catch(e2) { APP.lastPdfBase64 = ''; }
-  
+
   } catch(e) { console.error('PDF Error:',e); alert('Error PDF: '+e.message); }
 }
 
