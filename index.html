@@ -2283,28 +2283,66 @@ function submitMaintenance() {
   // Generate PDF first (stores base64 in APP.lastPdfBase64)
   exportRecord();
 
-  // Build payload and save to send queue
+  // Build payload
   const payload = buildPayload(record);
-  const queueId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
 
-  try {
-    const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
-    queue.push({ payload, queuedAt: new Date().toISOString(), id: queueId });
-    localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
-    updatePendingBar();
-  } catch(e) {
-    console.error('Cola llena:', e);
-  }
+  // Try to send directly, queue only if it fails
+  sendOrQueue(payload);
 
   renderHistory();
 
   const code = record.code;
-  document.getElementById('successMessage').textContent = `Equipo ${code} registrado como "${status}" por ${userName}.\n📤 Se enviará automáticamente.`;
+  document.getElementById('successMessage').textContent = `Equipo ${code} registrado como "${status}" por ${userName}.`;
   document.getElementById('successModal').classList.add('active');
   submitBtn.disabled = false;
+}
 
-  // Try to send queue after a brief delay
-  setTimeout(() => retrySendPending(), 2000);
+// Send directly if online, otherwise queue
+async function sendOrQueue(payload) {
+  const url = APP.config.webhookUrl;
+  if (!url) { showToast('⚠️ Configure la URL del Web App en ⚙️ Config'); return; }
+
+  const hasInternet = await checkRealConnection();
+
+  if (!hasInternet) {
+    // No internet — save to queue
+    const queueId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    try {
+      const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
+      queue.push({ payload, queuedAt: new Date().toISOString(), id: queueId });
+      localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
+      updatePendingBar();
+    } catch(e) {}
+    showToast('💾 Sin señal — Guardado en cola.');
+    return;
+  }
+
+  // Has internet — send directly (no queue)
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90000);
+
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'data=' + encodeURIComponent(JSON.stringify(payload)),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+    showToast('☁️ Registro enviado a Google Sheets ✅');
+  } catch(err) {
+    // Send failed — save to queue as backup
+    const queueId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    try {
+      const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
+      queue.push({ payload, queuedAt: new Date().toISOString(), id: queueId });
+      localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
+      updatePendingBar();
+    } catch(e) {}
+    showToast('💾 Error de envío — Guardado en cola.');
+  }
 }
 
 // sendToGoogleSheets is kept for compatibility but no longer used from submit
@@ -2484,20 +2522,31 @@ async function retrySendPending() {
   _retryLock = false;
 }
 
-// Auto-sync triggers
-window.addEventListener('online', () => {
-  setTimeout(() => retrySendPending(), 3000);
+// Auto-sync when connection comes back
+window.addEventListener('online', async () => {
+  await delay(3000);
+  const hasInternet = await checkRealConnection();
+  if (hasInternet) {
+    const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
+    if (queue.length > 0) {
+      showToast('📶 Conexión recuperada — Enviando pendientes...');
+      retrySendPending();
+    }
+  }
 });
 
 window.addEventListener('offline', () => {
   showToast('📵 Sin conexión a internet');
 });
 
-// Periodic auto-retry every 30 seconds
-setInterval(() => {
+// Periodic auto-retry every 60 seconds
+setInterval(async () => {
   const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
-  if (queue.length > 0) retrySendPending();
-}, 30000);
+  if (queue.length > 0) {
+    const hasInternet = await checkRealConnection();
+    if (hasInternet) retrySendPending();
+  }
+}, 60000);
 
 // ===== PHOTO HANDLING =====
 const APP_PHOTOS = { 1: null, 2: null, 3: null };
