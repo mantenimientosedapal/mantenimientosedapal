@@ -2283,66 +2283,28 @@ function submitMaintenance() {
   // Generate PDF first (stores base64 in APP.lastPdfBase64)
   exportRecord();
 
-  // Build payload
+  // Build payload and save to send queue
   const payload = buildPayload(record);
+  const queueId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
 
-  // Try to send directly, queue only if it fails
-  sendOrQueue(payload);
+  try {
+    const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
+    queue.push({ payload, queuedAt: new Date().toISOString(), id: queueId });
+    localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
+    updatePendingBar();
+  } catch(e) {
+    console.error('Cola llena:', e);
+  }
 
   renderHistory();
 
   const code = record.code;
-  document.getElementById('successMessage').textContent = `Equipo ${code} registrado como "${status}" por ${userName}.`;
+  document.getElementById('successMessage').textContent = `Equipo ${code} registrado como "${status}" por ${userName}.\n📤 Se enviará automáticamente.`;
   document.getElementById('successModal').classList.add('active');
   submitBtn.disabled = false;
-}
 
-// Send directly if online, otherwise queue
-async function sendOrQueue(payload) {
-  const url = APP.config.webhookUrl;
-  if (!url) { showToast('⚠️ Configure la URL del Web App en ⚙️ Config'); return; }
-
-  const hasInternet = await checkRealConnection();
-
-  if (!hasInternet) {
-    // No internet — save to queue
-    const queueId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-    try {
-      const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
-      queue.push({ payload, queuedAt: new Date().toISOString(), id: queueId });
-      localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
-      updatePendingBar();
-    } catch(e) {}
-    showToast('💾 Sin señal — Guardado en cola.');
-    return;
-  }
-
-  // Has internet — send directly (no queue)
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 90000);
-
-    await fetch(url, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'data=' + encodeURIComponent(JSON.stringify(payload)),
-      signal: controller.signal
-    });
-
-    clearTimeout(timeoutId);
-    showToast('☁️ Registro enviado a Google Sheets ✅');
-  } catch(err) {
-    // Send failed — save to queue as backup
-    const queueId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-    try {
-      const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
-      queue.push({ payload, queuedAt: new Date().toISOString(), id: queueId });
-      localStorage.setItem('sedapal_pending_sync', JSON.stringify(queue));
-      updatePendingBar();
-    } catch(e) {}
-    showToast('💾 Error de envío — Guardado en cola.');
-  }
+  // Try to send queue after a brief delay
+  setTimeout(() => retrySendPending(), 2000);
 }
 
 // sendToGoogleSheets is kept for compatibility but no longer used from submit
@@ -2522,31 +2484,20 @@ async function retrySendPending() {
   _retryLock = false;
 }
 
-// Auto-sync when connection comes back
-window.addEventListener('online', async () => {
-  await delay(3000);
-  const hasInternet = await checkRealConnection();
-  if (hasInternet) {
-    const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
-    if (queue.length > 0) {
-      showToast('📶 Conexión recuperada — Enviando pendientes...');
-      retrySendPending();
-    }
-  }
+// Auto-sync triggers
+window.addEventListener('online', () => {
+  setTimeout(() => retrySendPending(), 3000);
 });
 
 window.addEventListener('offline', () => {
   showToast('📵 Sin conexión a internet');
 });
 
-// Periodic auto-retry every 60 seconds
-setInterval(async () => {
+// Periodic auto-retry every 30 seconds
+setInterval(() => {
   const queue = JSON.parse(localStorage.getItem('sedapal_pending_sync') || '[]');
-  if (queue.length > 0) {
-    const hasInternet = await checkRealConnection();
-    if (hasInternet) retrySendPending();
-  }
-}, 60000);
+  if (queue.length > 0) retrySendPending();
+}, 30000);
 
 // ===== PHOTO HANDLING =====
 const APP_PHOTOS = { 1: null, 2: null, 3: null };
@@ -2873,7 +2824,9 @@ function exportRecord() {
   const isEsc = /SCANNER|ESCANER/.test(cat);
   const isTab = /TABLET/.test(cat);
   const isMon = /MONITOR/.test(cat);
-  const hasMon = !!(gv('MARCA MONITOR 1') || gv('SERIE MONITOR 1'));
+  const monMarca = gv('MARCA MONITOR 1').toUpperCase();
+  const monSerie = gv('SERIE MONITOR 1').toUpperCase();
+  const hasMon = !!(monMarca && monMarca !== 'NO APLICA' && monMarca !== 'N/A' && monMarca !== '-') || !!(monSerie && monSerie !== 'NO APLICA' && monSerie !== 'N/A' && monSerie !== '-');
 
   // Colors (RGB 0-255)
   const BLU = [0,119,182], BLU2 = [0,95,138], CYAN = [0,180,216];
