@@ -1610,6 +1610,7 @@ function loadCSVFile(input) {
 }
 
 function parseCSV(text) {
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
   const lines = text.split('\n').filter(l => l.trim());
   if (lines.length < 2) return [];
 
@@ -2979,9 +2980,9 @@ function exportRecord() {
   });
   y = Math.max(y + 3*4.3 + 3, tiy + 1);
 
-  // ===== 5. OBSERVACIONES =====
-  secHdr('5','Observaciones de M. Preventivo');
-  var obsText5 = last.observations || '';
+  // ===== 5. OBSERVACIONES DEL TECNICO =====
+  secHdr('5','Observaciones del T\u00e9cnico (Estado Previo del Equipo)');
+  var techObsText = last.techObservations || '';
   try {
     var chgU5 = null;
     var chgF5 = null;
@@ -2994,17 +2995,33 @@ function exportRecord() {
       var nFin5 = chgU5 ? chgU5.updated : '';
       var fIni5 = chgF5 ? chgF5.original : '';
       var fFin5 = chgF5 ? chgF5.updated : '';
-      obsText5 = 'USUARIO ASIGNADO INICIAL: ' + nIni5 + ', Ficha: ' + fIni5 + '\nUSUARIO ASIGNADO FINAL: ' + nFin5 + ', Ficha: ' + fFin5;
+      var cambioText = 'REASIGNACI\u00d3N: ' + nIni5 + ' (Ficha: ' + fIni5 + ') \u2192 ' + nFin5 + ' (Ficha: ' + fFin5 + ')';
+      techObsText = techObsText ? techObsText + '\n' + cambioText : cambioText;
     }
-  } catch(oe5) { obsText5 = last.observations || ''; }
+  } catch(oe5) {}
   fn('normal', 5.5); sT(VAL);
   var obsW5 = CW - 6;
-  var obsL5 = doc.splitTextToSize(obsText5, obsW5);
+  var obsL5 = doc.splitTextToSize(techObsText, obsW5);
   var obsLH5 = 3;
   var obsBH5 = Math.max(10, obsL5.length * obsLH5 + 5);
   rr(ML, y, CW, obsBH5, 1.5, WHITE, CELL_BD);
   doc.text(obsL5, ML + 3, y + 4);
   y += obsBH5 + 2;
+
+  // ===== 5b. OBSERVACIONES DE CONFORMIDAD DEL USUARIO =====
+  var userObsText = last.observations || '';
+  if (userObsText) {
+    rr(ML, y, CW, 5.5, 1, [255,247,237], [254,215,170]);
+    fn('bold',6); sT([154,52,18]);
+    doc.text('Observaciones de Conformidad del Usuario', ML+3, y+3.8);
+    y += 6.5;
+    fn('normal', 5.5); sT(VAL);
+    var userObsL = doc.splitTextToSize(userObsText, obsW5);
+    var userObsBH = Math.max(8, userObsL.length * obsLH5 + 5);
+    rr(ML, y, CW, userObsBH, 1.5, WHITE, [254,215,170]);
+    doc.text(userObsL, ML + 3, y + 4);
+    y += userObsBH + 2;
+  }
 
   // Separator
   sD([232,237,242]); doc.setLineWidth(0.2);
