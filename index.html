@@ -1840,7 +1840,8 @@ function renderEquipment(data) {
     // Check if group has any data
     const hasData = group.fields.some(f => {
       const val = findFieldValue(data, f.key);
-      return val && val.trim() !== '';
+      const upper = (val || '').trim().toUpperCase();
+      return val && upper !== '' && upper !== 'NO APLICA' && upper !== 'N/A' && upper !== 'N/T' && upper !== '-';
     });
     if (!hasData && group.name.includes('SEGUNDO MONITOR')) return; // skip empty 2nd monitor
 
@@ -2818,7 +2819,7 @@ function exportRecord() {
   const doc = new JC('p', 'mm', 'a4');
   const W = 210, H = 297, ML = 14, MR = 14, CW = W - ML - MR;
   let y = 0;
-  const gv = k => findFieldValue(eq, k) || '';
+  const gv = k => { const v = findFieldValue(eq, k) || ''; const u = v.toUpperCase(); return (u === 'NO APLICA' || u === 'N/A' || u === 'N/T' || u === '-') ? '' : v; };
   const cat = gv('CATEGORÍA').toUpperCase();
   const isPC = /PC|LAPTOP|WORKSTATION|WS/.test(cat);
   const isImp = /IMPRESORA|PLOTTER/.test(cat);
@@ -2827,7 +2828,7 @@ function exportRecord() {
   const isMon = /MONITOR/.test(cat);
   const monMarca = gv('MARCA MONITOR 1').toUpperCase();
   const monSerie = gv('SERIE MONITOR 1').toUpperCase();
-  const hasMon = !!(monMarca && monMarca !== 'NO APLICA' && monMarca !== 'N/A' && monMarca !== '-') || !!(monSerie && monSerie !== 'NO APLICA' && monSerie !== 'N/A' && monSerie !== '-');
+  const hasMon = !!(monMarca && monMarca !== 'NO APLICA' && monMarca !== 'N/A' && monMarca !== 'N/T' && monMarca !== '-') || !!(monSerie && monSerie !== 'NO APLICA' && monSerie !== 'N/A' && monSerie !== 'N/T' && monSerie !== '-');
 
   // Colors (RGB 0-255)
   const BLU = [0,119,182], BLU2 = [0,95,138], CYAN = [0,180,216];
